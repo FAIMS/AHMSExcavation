@@ -2,7 +2,259 @@
 User user; // don't touch
 String userid;
 
+makeLocalID(){
+    fetchOne("CREATE TABLE IF NOT EXISTS localSettings (key text primary key, value text);");
+    fetchOne("drop view if exists identifierAsSpreadsheet;");
+    fetchOne("create view identifierAsSpreadsheet as select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' ') as response from (select * from latestNonDeletedArchentIdentifiers order by attributename) group by uuid;");
+}
 
+makeLocalID();
+
+onEvent("control/Excavation_Data", "show", "refreshTrenchList()");
+onEvent("control/Excavation_Data/newTrench", "click","newTrench()");
+onEvent("control/Excavation_Data/TrenchList", "click", "loadTrench()");
+
+onEvent("control/Units", "show", "refreshUnitList()");
+onEvent("control/Units/UnitList", "click", "loadUnit()");
+
+refreshTrenchList(){
+    populateList("control/Excavation_Data/TrenchList", fetchEntityList("Trench"));
+}
+
+refreshUnitList(){
+    populateList("control/Units/UnitList", fetchEntityList("Unit"));
+}
+
+/*** ARCHENT: Trench ***/
+onEvent("Trench", "show", "showSlopeTab(true)");
+
+onEvent("Trench/Trench_Info/Update", "delayclick", "saveTrench(\"\")");
+onEvent("Trench/Slope/Update", "delayclick", "saveTrench(\"\")");
+onEvent("Trench/Trench_Info/MapDetails", "click", "showTab(\"Trench/Map\")");
+
+onEvent("Trench/Trench_Info/Delete", "delayclick", "deleteTrench()");
+onEvent("Trench/Slope/Delete", "delayclick", "deleteTrench()");
+
+onEvent("Trench/Trench_Info/Take_GPS", "click", "fillInGPS(\"Trench/Trench_Info/\")");
+onEvent("Trench/Trench_Info/Fill_Slope_Details", "click", "showSlopeTab(false)");
+
+onEvent("Trench/Trench_Info/Take_Photo", "click", "attachPictureTo(\"Trench/Trench_Info/Photos\")");
+onEvent("Trench/Trench_Info/Attach_Sketches", "click", "attachFileTo(\"Trench/Trench_Info/Sketches\")");
+onEvent("Trench/Trench_Info/View_Attached", "click", "viewArchEntAttachedFiles(trench_id)");
+
+onEvent("Trench/Units", "show", "refreshRelatedUnits()");
+onEvent("Trench/Units/New_Unit", "delayclick", "saveTrench(\"newUnit()\")");
+onEvent("Trench/Units/Unit_List", "click", "loadUnit()");
+
+String trench_id = null;
+
+newTrench() {
+    trench_id = null;
+    newTabGroup("Trench");
+    setFieldValue("Trench/Trench_Info/Job_Name", getFieldValue("control/Excavation_Data/Job_Name"));
+    autoNumTrench();
+}
+
+loadTrench() {
+    trench_id = getListItemValue();
+    loadTrenchFrom(trench_id);
+}
+
+loadTrenchFrom(archentid) {
+    trench_id = archentid;
+    if (isNull(trench_id)) {
+        showToast("No Trench selected");
+        return;
+    }
+    showTabGroup("Trench", trench_id);
+}
+
+saveTrench(String callback) {
+    if (isNull(getFieldValue("Trench/Trench_Info/Trench_ID"))) {
+        showWarning("Validation Error", "Cannot save Trench without identifiers");
+        return;
+    }
+    
+    if (!isNull(trench_id)) {
+        entity = fetchArchEnt(trench_id);
+    }
+    saveTabGroup("Trench", trench_id, null, null, "trench_id = getLastSavedRecordId();" + callback);
+}
+
+deleteTrench() {
+    if (!isNull(trench_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Trench!", "reallyDeleteTrench()", "doNotDelete()");
+    } else {
+        cancelTabGroup("Trench", true);
+    }
+}
+
+reallyDeleteTrench() {
+    deleteArchEnt(trench_id);
+    cancelTabGroup("Trench", false);
+}
+
+loadTrenchAttributes() {
+    populateDropDown("Trench/Trench_Info/Dimensions", makeVocab("Dimensions"));
+    populateRadioGroup("Trench/Trench_Info/Artefacts_Present", makeVocab("Artefacts Present"));
+    populateCheckBoxGroup("Trench/Trench_Info/Landform_Genesis", makeVocab("Landform Genesis"));
+    populateCheckBoxGroup("Trench/Trench_Info/Landform_Element", makeVocab("Landform Element"));
+    populateDropDown("Trench/Trench_Info/Geomorphic_Context", makeVocab("Geomorphic Context"));
+    populateCheckBoxGroup("Trench/Trench_Info/Samples_Collected", makeVocab("Samples Collected"));
+    populateDropDown("Trench/Slope/Slope_Detail", makeVocab("Slope Detail"));
+    populateDropDown("Trench/Slope/Slope_Detail_2", makeVocab("Slope Detail 2"));
+}
+
+autoNumTrench() {
+    Object next_trench_id = fetchOne("select value from localSettings where key = 'Trench ID';");
+    if (isNull(next_trench_id)){
+        next_trench_id = "1";
+    } else {
+        next_trench_id = next_trench_id.get(0);
+    }
+    setFieldValue("Trench/Trench_Info/Trench_ID", next_trench_id);
+    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Trench ID', "+ next_trench_id +"+1);");
+}
+
+showSlopeTab(Boolean onLoad) {
+    for(vocabid : getFieldValue("Trench/Trench_Info/Landform_Element")) {
+        if(getVocabName(vocabid.getName()).equals("{bSlope}")) {
+            showTab("Trench/Slope");
+            return;
+        }
+    }
+    if(!onLoad) {
+        showToast("Slope was not selected in Landform Element");
+    } else {
+        showTab("Trench/Slope");
+        cancelTab("Trench/Slope", false);
+    }
+    return;
+}
+
+refreshRelatedUnits() {
+    ArrayList units = new ArrayList();
+    if(!isNull(trench_id)) {
+         units = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
+            "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
+            "            FROM latestNonDeletedArchentIdentifiers\n"+
+            "           WHERE aenttypename = 'Unit'\n"+
+            "             AND uuid in (select uuid\n"+
+            "                            FROM latestNonDeletedAentReln\n"+
+            "                           where relationshipid in (select relationshipid\n"+
+            "                                                      FROM latestNonDeletedAentReln\n"+
+            "                                                      JOIN relationship using (relationshipid)\n"+
+            "                                                      JOIN relntype using (relntypeid)\n"+
+            "                                                    where uuid = "+trench_id+"\n"+
+            "                                                       and relntypeName = 'TrenchUnit')\n"+
+            "                             and uuid != "+trench_id+")\n"+
+            "        ORDER BY uuid, attributename ASC)\n"+
+            "group by uuid\n"+
+            "order by valuetimestamp desc, uuid, attributename;");
+    }
+    populateList("Trench/Units/Unit_List", units);
+}
+/*** ARCHENT: Unit ***/
+onEvent("Unit", "show", "showGrassRootsTab(true)");
+
+onEvent("Unit/Soil/Update", "delayclick", "saveUnit(\"\")");
+onEvent("Unit/Grass_Roots/Update", "delayclick", "saveUnit(\"\")");
+onEvent("Unit/Add/Update", "delayclick", "saveUnit(\"\")");
+
+onEvent("Unit/Soil/Delete", "delayclick", "deleteUnit()");
+onEvent("Unit/Grass_Roots/Delete", "delayclick", "deleteUnit()");
+onEvent("Unit/Add/Delete", "delayclick", "deleteUnit()");
+
+onEvent("Unit/Soil/Fill_Grass_Roots_Details", "click", "showGrassRootsTab(false)");
+
+onEvent("Unit/Add/Take_Photo", "click", "attachPictureTo(\"Unit/Add/Photos\")");
+onEvent("Unit/Add/Attach_Sketches", "click", "attachFileTo(\"Unit/Add/Sketches\")");
+onEvent("Unit/Add/View_Attached", "click", "viewArchEntAttachedFiles(unit_id)");
+
+String unit_id = null;
+
+newUnit() {
+    unit_id = null;
+    newTabGroup("Unit");
+    autoNumUnit();
+}
+
+loadUnit() {
+    unit_id = getListItemValue();
+    loadUnitFrom(unit_id);
+}
+
+loadUnitFrom(archentid) {
+    unit_id = archentid;
+    if (isNull(unit_id)) {
+        showToast("No Unit selected");
+        return;
+    }
+    showTabGroup("Unit", unit_id);
+}
+
+saveUnit(String callback) {
+    if (isNull(getFieldValue("Unit/Soil/Unit_ID"))) {
+        showWarning("Validation Error", "Cannot save Unit without ID");
+        return;
+    }
+    
+    if (!isNull(unit_id)) {
+        entity = fetchArchEnt(unit_id);
+    }
+    saveTabGroup("Unit", unit_id, null, null, "unit_id = getLastSavedRecordId(); saveEntitiesToRel(\"TrenchUnit\", trench_id, unit_id);" + callback);
+}
+
+deleteUnit() {
+    if (!isNull(unit_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Unit!", "reallyDeleteUnit()", "doNotDelete()");
+    } else {
+        cancelTabGroup("Unit", true);
+    }
+}
+
+reallyDeleteUnit() {
+    deleteArchEnt(unit_id);
+    cancelTabGroup("Unit", false);
+}
+
+loadUnitAttributes() {
+    populateHierarchicalDropDown("Unit/Soil/Texture", "Texture");
+    populateDropDown("Unit/Soil/Moisture", makeVocab("Moisture"));
+    populateDropDown("Unit/Soil/Grain_size", makeVocab("Grain size"));
+    populateDropDown("Unit/Soil/Consistency", makeVocab("Consistency"));
+    populateDropDown("Unit/Soil/Cementation", makeVocab("Cementation"));
+    populateDropDown("Unit/Soil/Inclusions", makeVocab("Inclusions"));
+    populateCheckBoxGroup("Unit/Soil/Distubance", makeVocab("Distubance"));
+    populateRadioGroup("Unit/Soil/Artefacts", makeVocab("Artefacts"));
+    populateDropDown("Unit/Grass_Roots/Root_Size", makeVocab("Root Size"));
+    populateDropDown("Unit/Grass_Roots/Root_Abundance", makeVocab("Root Abundance"));
+}
+
+autoNumUnit() {
+    Object next_unit_id = fetchOne("select value from localSettings where key = 'Unit';");
+    if (isNull(next_unit_id)){
+        next_unit_id = "1";
+    } else {
+        next_unit_id = next_unit_id.get(0);
+    }
+    setFieldValue("Unit/Soil/Unit_ID", next_unit_id);
+    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', "+ next_unit_id +"+1);");
+}
+
+showGrassRootsTab(Boolean onLoad) {
+    if(getVocabName(getFieldValue("Unit/Soil/Inclusions")).equals("{bGrass_roots}")) {
+        showTab("Unit/Grass_Roots");
+        return;
+    }
+    if(!onLoad) {
+        showToast("Grass Roots was not selected in Inclusions");
+    } else {
+        showTab("Unit/Grass_Roots");
+        cancelTab("Unit/Grass_Roots", false);
+    }
+    return;
+}
 
 /*** MISC ***/
 
@@ -22,18 +274,54 @@ saveEntitiesToHierRel(type, entity1, entity2, e1verb, e2verb) {
     addReln(entity2, rel_id, e2verb);
 }
 
-makeVocab(String attrib){
+makeVocab(String attrib) {
     Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' ");
     return a;
 }
 
-makePictureGallery(String attrib){
+getVocabName(String vocabid) {
+    Object a = fetchOne("select vocabName from vocabulary where vocabid = '"+ vocabid +"';");
+    return a.get(0);
+}
+
+makePictureGallery(String attrib) {
     fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabname;");
 }
 
-doNotDelete(){
+doNotDelete() {
     showToast("Delete Cancelled.");
 }
+
+fillInGPS(String path) {
+    Object position = getGPSPosition();    
+    Object projPosition = getGPSPositionProjected();
+    if (projPosition != null ){
+        Double latitude = position.getLatitude();
+        Double longitude = position.getLongitude();
+        Double northing = projPosition.getLatitude();
+        Double easting = projPosition.getLongitude();
+        setFieldValue(path+"Latitude", latitude);
+        setFieldValue(path+"Longitude", longitude);
+        setFieldValue(path+"Northing", northing);
+        setFieldValue(path+"Easting", easting);
+    } else {
+        showToast("GPS Not initialized");
+    }
+}
+
+/***Map stuff ***/
+DATA_ENTRY_LAYER = "Data Entry Layer";
+DATA_ENTRY_LAYER_ID = 0;
+
+onEvent("Trench/Map/centre", "click", "centerOnCurrentPosition(\"control/Map/map\");"); 
+
+initMap() {
+    setMapZoom("Trench/Map/map", 15.0f);
+    DATA_ENTRY_LAYER_ID = createCanvasLayer("Trench/Map/map", DATA_ENTRY_LAYER);
+    //showBaseMap("control/Map/map", "Base Layer", "files/data/maps/BM1.tif");
+}
+
+initMap();
 
 /*** USER ***/
 
@@ -66,8 +354,8 @@ onEvent("user/usertab/users", "click", "login()");
 
 onEvent("control/Control/startsync", "click", "startSync()");
 onEvent("control/Control/stopsync", "click", "stopSync()");
-onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
-onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
+onEvent("control/Control/connectExternalGPS", "click", "startExternalGPS()");
+onEvent("control/Control/connectInternalGPS", "click", "startInternalGPS()");
 
 setSyncMinInterval(10.0f);
 setSyncMaxInterval(20.0f);
@@ -82,3 +370,6 @@ stopSync() {
     setSyncEnabled(false);
     setFileSyncEnabled(false);
 }
+
+loadTrenchAttributes();
+loadUnitAttributes();

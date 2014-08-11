@@ -27,8 +27,15 @@
               <login/>
             </usertab>
           </user>
-
           <control>
+            <Excavation_Data>
+              <Job_Name/>
+              <newTrench/>
+              <TrenchList/>
+            </Excavation_Data>
+            <Units>
+              <UnitList/>
+            </Units>
             <Control>
               <startsync/>
               <stopsync/>
@@ -36,10 +43,106 @@
               <connectExternalGPS/>
             </Control>
           </control>
-
+          <Trench>
+            <Trench_Info>
+              <Job_Name/>
+              <Trench_ID/>
+              <container1>
+                <child1>
+                  <Latitude/>
+                </child1>
+                <child2>
+                  <Longitude/>
+                </child2>
+              </container1>
+              <container2>
+                <child1>
+                  <Northing/>
+                </child1>
+                <child2>
+                  <Easting/>
+                </child2>
+              </container2>
+              <Take_GPS/>
+              <Dimensions/>
+              <Artefacts_Present/>
+              <Landform_Genesis/>
+              <Landform_Element/>
+              <Fill_Slope_Details/>
+              <Geomorphic_Context/>
+              <Aspect/>
+              <Distance_To_Water/>
+              <Samples_Collected/>
+              <Photos/>
+              <Take_Photo/>
+              <Sketches/>
+              <Attach_Sketches/>
+              <View_Attached/>
+              <Update/>
+              <Delete/>
+              <MapDetails/>
+            </Trench_Info>
+            <Slope>
+              <Slope_Degree/>
+              <Slope_Detail/>
+              <Slope_Detail_2/>
+              <Update/>
+              <Delete/>
+            </Slope>
+            <Units>
+              <New_Unit/>
+              <Unit_List/>
+            </Units>
+            <Map>
+              <map/>
+              <centre/>
+            </Map>
+          </Trench>
+          <Unit>
+            <Soil>
+              <Unit_ID/>
+              <Horizon/>
+              <Depth/>
+              <pH/>
+              <Colour/>
+              <Texture/>
+              <Moisture/>
+              <Grain_size/>
+              <Consistency/>
+              <Cementation/>
+              <Inclusions/>
+              <Fill_Grass_Roots_Details/>
+              <Distubance/>
+              <Artefacts/>
+              <Notes/>
+              <Update/>
+              <Delete/>
+            </Soil>
+            <Grass_Roots>
+              <Root_Size/>
+              <Root_Abundance/>
+              <Update/>
+              <Delete/>
+            </Grass_Roots>
+            <Add>
+              <Photos/>
+              <Take_Photo/>
+              <Sketches/>
+              <Attach_Sketches/>
+              <View_Attached/>
+              <Update/>
+              <Delete/>
+            </Add>
+          </Unit>
         </faims>
       </instance>
-      <!-- Insert nodeset bindings here -->
+      <bind nodeset="/faims/Trench/Trench_Info/container1/child1/Latitude" type="decimal"/>
+      <bind nodeset="/faims/Trench/Trench_Info/container1/child2/Longitude" type="decimal"/>
+      <bind nodeset="/faims/Trench/Trench_Info/container2/child1/Northing" type="decimal"/>
+      <bind nodeset="/faims/Trench/Trench_Info/container2/child2/Easting" type="decimal"/>
+      <bind nodeset="/faims/Trench/Slope/Slope_Degree" type="decimal"/>
+      <bind nodeset="/faims/Unit/Soil/Depth" type="decimal"/>
+      <bind nodeset="/faims/Unit/Soil/Notes" type="string"/>
     </model>
   </h:head>
   <h:body>
@@ -79,6 +182,32 @@
     </group>
     <group ref="control">
       <label>{Control}</label>
+      <group ref="Excavation_Data" faims_scrollable="false">
+        <label>{Excavation_Data}</label>
+        <input faims_certainty="false" faims_read_only="false" ref="Job_Name">
+          <label>{Job_Name}</label>
+        </input>
+        <trigger ref="newTrench">
+          <label>New {Trench}</label>
+        </trigger>
+        <select1 appearance="compact" faims_annotation="false" faims_certainty="false" ref="TrenchList">
+          <label>{TapTrenchID}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+      <group ref="Units" faims_scrollable="false">
+        <label>{Units}</label>
+        <select1 appearance="compact" faims_annotation="false" faims_certainty="false" ref="UnitList">
+          <label>{TapUnitID}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
       <group ref="Control">
         <label>Control</label>
         <trigger ref="connectExternalGPS">
@@ -95,6 +224,325 @@
         </trigger>
       </group>
     </group>
-   
+    <group ref="Trench" faims_archent_type="Trench">
+      <label>{Trench}</label>
+      <group ref="Trench_Info">
+        <label>{Trench_Info}</label>
+        <input ref="Job_Name" faims_attribute_name="Job Name" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Job_Name}</label>
+        </input>
+        <input ref="Trench_ID" faims_attribute_name="Trench ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+          <label>{Trench_ID}</label>
+        </input>
+        <group ref="container1" faims_style="orientation">
+          <label></label>
+          <group ref="child1" faims_style="even">
+            <label></label>
+            <input ref="Latitude" faims_attribute_name="Latitude" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+              <label>{Latitude}</label>
+            </input>
+          </group>
+          <group ref="child2" faims_style="even">
+            <label></label>
+            <input ref="Longitude" faims_attribute_name="Longitude" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+              <label>{Longitude}</label>
+            </input>
+          </group>
+        </group>
+        <group ref="container2" faims_style="orientation">
+          <label></label>
+          <group ref="child1" faims_style="even">
+            <label></label>
+            <input ref="Northing" faims_attribute_name="Northing" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+              <label>{Northing}</label>
+            </input>
+          </group>
+          <group ref="child2" faims_style="even">
+            <label></label>
+            <input ref="Easting" faims_attribute_name="Easting" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+              <label>{Easting}</label>
+            </input>
+          </group>
+        </group>
+        <trigger ref="Take_GPS">
+          <label>{Take_GPS}</label>
+        </trigger>
+        <select1 ref="Dimensions" faims_attribute_name="Dimensions" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Dimensions}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <select1 appearance="full" ref="Artefacts_Present" faims_attribute_name="Artefacts Present" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Artefacts_Present}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <select ref="Landform_Genesis" faims_attribute_name="Landform Genesis" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Landform_Genesis}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select>
+        <select ref="Landform_Element" faims_attribute_name="Landform Element" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Landform_Element}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select>
+        <trigger ref="Fill_Slope_Details">
+          <label>{Fill_Slope_Details}</label>
+        </trigger>
+        <select1 ref="Geomorphic_Context" faims_attribute_name="Geomorphic Context" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Geomorphic_Context}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <input ref="Aspect" faims_attribute_name="Aspect" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+          <label>{Aspect}</label>
+        </input>
+        <input ref="Distance_To_Water" faims_attribute_name="Distance to Water" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+          <label>{Distance_To_Water}</label>
+        </input>
+        <select ref="Samples_Collected" faims_attribute_name="Samples Collected" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Samples_Collected}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select>
+        <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+          <label>{Photos}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select>
+        <trigger ref="Take_Photo">
+          <label>{Take_Photo}</label>
+        </trigger>
+        <select type="file" ref="Sketches" faims_attribute_name="Sketches" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+          <label>{Sketches}</label>
+          <item>
+            <label>{placeholder}</label>
+            <value>placeholder</value>
+          </item>
+        </select>
+        <trigger ref="Attach_Sketches">
+          <label>{Attach_Sketches}</label>
+        </trigger>
+        <trigger ref="View_Attached">
+          <label>{View_Attached}</label>
+        </trigger>
+        <trigger ref="Update">
+          <label>{Save_Trench}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete_Trench}</label>
+        </trigger>
+        <trigger ref="MapDetails">
+          <label>{mapDetails}</label>
+        </trigger>
+      </group>
+      <group ref="Slope" faims_hidden="true">
+        <label>{Slope}</label>
+        <input ref="Slope_Degree" faims_attribute_name="Slope Degree" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Slope_Degree}</label>
+        </input>
+        <select1 ref="Slope_Detail" faims_attribute_name="Slope Detail" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Slope_Detail}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <select1 ref="Slope_Detail_2" faims_attribute_name="Slope Detail 2" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Slope_Detail_2}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <trigger ref="Update">
+          <label>{Save_Trench}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete_Trench}</label>
+        </trigger>
+      </group>
+      <group ref="Units" faims_scrollable="false">
+        <label>{Units}</label>
+        <trigger ref="New_Unit">
+          <label>{New_Unit}</label>
+        </trigger>
+        <select1 appearance="compact" ref="Unit_List" faims_certainty="false" faims_annotation="false">
+          <label>{Units_in_Trench}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+      <group ref="Map" faims_scrollable="false">
+        <label>{Map}</label>
+         <input ref="map" faims_map="true" faims_certainty="false">
+          <label/>
+        </input>
+        <trigger ref="centre">
+          <label>{Centre_Me}</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="Unit" faims_archent_type="Unit">
+      <label>{Unit}</label>
+      <group ref="Soil">
+        <label>{Soil}</label>
+        <input ref="Unit_ID" faims_attribute_name="Unit ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+          <label>{Unit_ID}</label>
+        </input>
+        <input ref="Horizon" faims_attribute_name="Horizon" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+          <label>{Horizon}</label>
+        </input>
+        <input ref="Depth" faims_attribute_name="Depth" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Depth}</label>
+        </input>
+        <input ref="pH" faims_attribute_name="pH" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+          <label>{pH}</label>
+        </input>
+        <input ref="Colour" faims_attribute_name="Colour" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+          <label>{Colour}</label>
+        </input>
+        <select1 ref="Texture" faims_attribute_name="Texture" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Texture}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <select1 ref="Moisture" faims_attribute_name="Moisture" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Moisture}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <select1 ref="Grain_size" faims_attribute_name="Grain size" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Grain_size}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <select1 ref="Consistency" faims_attribute_name="Consistency" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Consistency}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <select1 ref="Cementation" faims_attribute_name="Cementation" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Cementation}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <select1 ref="Inclusions" faims_attribute_name="Inclusions" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Inclusions}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <trigger ref="Fill_Grass_Roots_Details">
+          <label>{Fill_Grass_Roots_Details}</label>
+        </trigger>
+        <select ref="Distubance" faims_attribute_name="Distubance" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Distubance}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select>
+        <select1 appearance="full" ref="Artefacts" faims_attribute_name="Artefacts" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Artefacts}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+          <label>{Notes}</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save_Unit}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete_Unit}</label>
+        </trigger>
+      </group>
+      <group ref="Grass_Roots" faims_hidden="true">
+        <label>{Grass_Roots}</label>
+        <select1 ref="Root_Size" faims_attribute_name="Root Size" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Root_Size}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <select1 ref="Root_Abundance" faims_attribute_name="Root Abundance" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Root_Abundance}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <trigger ref="Update">
+          <label>{Save_Unit}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete_Unit}</label>
+        </trigger>
+      </group>
+      <group ref="Add">
+        <label>{Add}</label>
+        <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+          <label>{Photos}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select>
+        <trigger ref="Take_Photo">
+          <label>{Take_Photo}</label>
+        </trigger>
+        <select type="file" ref="Sketches" faims_attribute_name="Sketches" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+          <label>{Sketches}</label>
+          <item>
+            <label>{placeholder}</label>
+            <value>placeholder</value>
+          </item>
+        </select>
+        <trigger ref="Attach_Sketches">
+          <label>{Attach_Sketches}</label>
+        </trigger>
+        <trigger ref="View_Attached">
+          <label>{View_Attached}</label>
+        </trigger>
+        <trigger ref="Update">
+          <label>{Save_Trench}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete_Trench}</label>
+        </trigger>
+      </group>
+    </group>
   </h:body>
 </h:html>
