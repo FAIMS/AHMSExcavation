@@ -73,6 +73,7 @@
               <Aspect/>
               <Distance_To_Water/>
               <Samples_Collected/>
+              <Samples_Details/>
               <Photos/>
               <Take_Photo/>
               <Sketches/>
@@ -80,7 +81,6 @@
               <View_Attached/>
               <Update/>
               <Delete/>
-              <MapDetails/>
             </Trench_Info>
             <Slope>
               <Slope_Degree/>
@@ -93,10 +93,18 @@
               <New_Unit/>
               <Unit_List/>
             </Units>
-            <Map>
-              <map/>
-              <centre/>
-            </Map>
+            <Spits>
+              <New_Spit/>
+              <Spit_List/>
+            </Spits>
+            <PhotoLog>
+              <newPhotoLog/>
+              <ListPhotoLog/>
+            </PhotoLog>
+            <Notes>
+              <newNote/>
+              <ListNotes/>
+            </Notes>
           </Trench>
           <Unit>
             <Soil>
@@ -134,15 +142,62 @@
               <Delete/>
             </Add>
           </Unit>
+          <Spit>
+            <Spit_Info>
+              <Spit_ID/>
+              <Bucket_Count/>
+              <Thickness/>
+              <Artefact_Density/>
+              <Notes/>
+              <Update/>
+              <Delete/>
+            </Spit_Info>
+          </Spit>
+          <Photograph_log>
+            <Photograph_log>
+              <Photograph_reference_ID/>
+              <Scene_type/>
+              <Trench_ID/>
+              <Job_Name/>
+              <Creation_Date/>
+              <Created_By/>
+              <Update/>
+              <Duplicate/>
+              <New/>
+              <Close/>
+              <Delete/>
+            </Photograph_log>
+          </Photograph_log>
+
+          <Notes>
+            <Notes>
+              <Note_Label/>
+              <Note/>
+              <Trench_ID/>
+              <Job_Name/>
+              <Creation_Date/>
+              <Created_By/>
+              <Update/>
+              <Duplicate/>
+              <New/>
+              <Close/>
+              <Delete/>
+            </Notes>
+          </Notes>
         </faims>
       </instance>
+      <bind nodeset="/faims/Trench/Trench_Info/Trench_ID" type="decimal"/>
       <bind nodeset="/faims/Trench/Trench_Info/container1/child1/Latitude" type="decimal"/>
       <bind nodeset="/faims/Trench/Trench_Info/container1/child2/Longitude" type="decimal"/>
       <bind nodeset="/faims/Trench/Trench_Info/container2/child1/Northing" type="decimal"/>
       <bind nodeset="/faims/Trench/Trench_Info/container2/child2/Easting" type="decimal"/>
       <bind nodeset="/faims/Trench/Slope/Slope_Degree" type="decimal"/>
+      <bind nodeset="/faims/Unit/Soil/Unit_ID" type="decimal"/>
       <bind nodeset="/faims/Unit/Soil/Depth" type="decimal"/>
       <bind nodeset="/faims/Unit/Soil/Notes" type="string"/>
+      <bind nodeset="/faims/Spit/Spit_Info/Spit_ID" type="decimal"/>
+      <bind nodeset="/faims/Spit/Spit_Info/Artefact_Density" type="decimal"/>
+      <bind nodeset="/faims/Spit/Spit_Info/Notes" type="string"/>
     </model>
   </h:head>
   <h:body>
@@ -318,6 +373,9 @@
             <value>placeholder</value>
           </item>
         </select>
+        <input ref="Samples_Details" faims_attribute_name="Samples Details" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+          <label>{Samples_Details}</label>
+        </input>
         <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
           <label>{Photos}</label>
           <item>
@@ -346,9 +404,6 @@
         </trigger>
         <trigger ref="Delete">
           <label>{Delete_Trench}</label>
-        </trigger>
-        <trigger ref="MapDetails">
-          <label>{mapDetails}</label>
         </trigger>
       </group>
       <group ref="Slope" faims_hidden="true">
@@ -390,14 +445,44 @@
           </item>
         </select1>
       </group>
-      <group ref="Map" faims_scrollable="false">
-        <label>{Map}</label>
-         <input ref="map" faims_map="true" faims_certainty="false">
-          <label/>
-        </input>
-        <trigger ref="centre">
-          <label>{Centre_Me}</label>
+      <group ref="Spits" faims_scrollable="false">
+        <label>{Spits}</label>
+        <trigger ref="New_Spit">
+          <label>{New_Spit}</label>
         </trigger>
+        <select1 appearance="compact" ref="Spit_List" faims_certainty="false" faims_annotation="false">
+          <label>{Spits_in_Trench}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+      <group ref="PhotoLog" faims_scrollable="false">
+        <label>Photo Log</label>
+        <trigger ref="newPhotoLog">
+          <label>Add new Photo Log</label> 
+        </trigger>
+        <select1 appearance="compact" ref="ListPhotoLog" faims_certainty="false" faims_annotation="false">
+          <label>List of Photo Logs</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+      <group ref="Notes" faims_scrollable="false">
+        <label>Notes</label>
+        <trigger ref="newNote">
+          <label>Add new Note</label> 
+        </trigger>
+        <select1 appearance="compact" ref="ListNotes" faims_certainty="false" faims_annotation="false">
+          <label>List of Notes</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
       </group>
     </group>
     <group ref="Unit" faims_archent_type="Unit">
@@ -407,7 +492,7 @@
         <input ref="Unit_ID" faims_attribute_name="Unit ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
           <label>{Unit_ID}</label>
         </input>
-        <input ref="Horizon" faims_attribute_name="Horizon" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+        <input ref="Horizon" faims_attribute_name="Horizon" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
           <label>{Horizon}</label>
         </input>
         <input ref="Depth" faims_attribute_name="Depth" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
@@ -511,7 +596,7 @@
           <label>{Delete_Unit}</label>
         </trigger>
       </group>
-      <group ref="Add">
+      <group ref="Add" faims_hidden="true">
         <label>{Add}</label>
         <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
           <label>{Photos}</label>
@@ -537,10 +622,121 @@
           <label>{View_Attached}</label>
         </trigger>
         <trigger ref="Update">
-          <label>{Save_Trench}</label>
+          <label>{Save_Unit}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>{Delete_Trench}</label>
+          <label>{Delete_Unit}</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="Spit" faims_archent_type="Spit">
+      <label>Spit</label>
+      <group ref="Spit_Info">
+        <label>Spit Info</label>
+        <input ref="Spit_ID" faims_attribute_name="Spit ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+          <label>{Spit_ID}</label>
+        </input>
+        <input ref="Bucket_Count" faims_attribute_name="Bucket Count" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Bucket_Count}</label>
+        </input>
+        <input ref="Thickness" faims_attribute_name="Thickness" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Thickness}</label>
+        </input>
+        <input ref="Artefact_Density" faims_attribute_name="Artefact Density" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Artefact_Density}</label>
+        </input>
+        <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+          <label>{Notes}</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save_Spit}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete_Spit}</label>
+        </trigger>
+      </group>
+    </group>
+
+
+     <!-- ArchEnt: Photograph Log -->
+    <group ref="Photograph_log" faims_archent_type="Photograph log">
+      <label>Photograph Log</label>
+      <group ref="Photograph_log">
+        <label>Photograph Log</label>
+        <input faims_attribute_name="Photograph reference ID" faims_attribute_type="freetext" faims_read_only="false" ref="Photograph_reference_ID" faims_certainty="true">
+          <label>Photograph Log ID</label>
+        </input>
+        <input faims_attribute_name="Scene type" faims_attribute_type="freetext" faims_certainty="true" faims_read_only="false" ref="Scene_type">
+          <label>Description</label>
+        </input>
+         <input faims_certainty="false" faims_read_only="true" ref="Trench_ID" faims_attribute_name="PL Trench ID" faims_attribute_type="freetext">
+          <label>Trench ID</label>
+        </input>
+        <input faims_certainty="false" faims_read_only="true" ref="Job_Name" faims_attribute_name="PL Job Name" faims_attribute_type="freetext">
+          <label>Job Name</label>
+        </input>       
+        <input faims_certainty="false" faims_read_only="true" ref="Creation_Date">
+          <label>Timestamp</label>
+        </input>
+        <input faims_certainty="false" faims_read_only="true" ref="Created_By">
+          <label>Author</label>
+        </input>
+        <trigger ref="Update">
+        <label>Save Record</label>
+        </trigger>
+        <trigger ref="Duplicate">
+          <label>Save and Duplicate Record</label>
+        </trigger>
+        <trigger ref="New">
+          <label>Save and New Record</label>
+        </trigger>
+        <trigger ref="Close">
+          <label>Save and Close Record</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>Delete Record</label>
+        </trigger>
+      </group>
+    </group>
+
+
+      <!-- ArchEnt: Photograph Log -->
+    <group ref="Notes" faims_archent_type="Notes">
+      <label>Notes</label>
+      <group ref="Notes">
+        <label>Notes</label>
+        <input faims_attribute_name="Note Label" faims_attribute_type="freetext" faims_read_only="false" ref="Note_Label" faims_certainty="true">
+          <label>Note Label</label>
+        </input>
+        <input faims_attribute_name="Note" faims_attribute_type="freetext" faims_certainty="true" faims_read_only="false" ref="Note">
+          <label>Note</label>
+        </input>
+         <input faims_certainty="false" faims_read_only="true" ref="Trench_ID" faims_attribute_name="N Trench ID" faims_attribute_type="freetext">
+          <label>Trench ID</label>
+        </input>
+        <input faims_certainty="false" faims_read_only="true" ref="Job_Name" faims_attribute_name="N Job Name" faims_attribute_type="freetext">
+          <label>Job Name</label>
+        </input>       
+        <input faims_certainty="false" faims_read_only="true" ref="Creation_Date" faims_attribute_name="Timestamp" faims_attribute_type="freetext">
+          <label>Timestamp</label>
+        </input>
+        <input faims_certainty="false" faims_read_only="true" ref="Created_By" faims_attribute_name="Author" faims_attribute_type="freetext">
+          <label>Author</label>
+        </input>
+        <trigger ref="Update">
+        <label>Save Record</label>
+        </trigger>
+        <trigger ref="Duplicate">
+          <label>Save and Duplicate Record</label>
+        </trigger>
+        <trigger ref="New">
+          <label>Save and New Record</label>
+        </trigger>
+        <trigger ref="Close">
+          <label>Save and Close Record</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>Delete Record</label>
         </trigger>
       </group>
     </group>

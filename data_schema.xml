@@ -3,13 +3,22 @@
   <RelationshipElement name="TrenchUnit" type="bidirectional">
     <description>Defines a 1:N relationship between a Trench and related Units</description>
   </RelationshipElement>
+  <RelationshipElement name="TrenchSpit" type="bidirectional">
+    <description>Defines a 1:N relationship between a Trench and related Spits</description>
+  </RelationshipElement>
+  <RelationshipElement name="TrenchPhotographLog" type="bidirectional">
+    <description>Implements a 1:N between a feature and photo logs</description>
+  </RelationshipElement>
+  <RelationshipElement name="TrenchNote" type="bidirectional">
+    <description>Implements a 1:N between a feature and photo logs</description>
+  </RelationshipElement>
 
   <ArchaeologicalElement name="Trench">
     <description></description>
     <property name="Trench ID" type="freetext" isIdentifier="true">
       <description>Description TBD</description>
     </property>
-    <property name="Job Name" type="freetext">
+    <property name="Job Name" type="freetext" isIdentifier="true">
       <description>Description TBD</description>
     </property>
     <property name="Latitude" type="freetext">
@@ -211,6 +220,9 @@
         </term>
       </lookup>
     </property>
+    <property name="Samples Details" type="freetext">
+      <description>Description TBD</description>
+    </property>
     <property name="Photos" type="file">
       <description>Description TBD</description>
     </property>
@@ -222,7 +234,7 @@
     <property name="Unit ID" type="freetext" isIdentifier="true">
       <description>Description TBD</description>
     </property>
-    <property name="Horizon" type="freetext">
+    <property name="Horizon" type="freetext" isIdentifier="true">
       <description>Description TBD</description>
     </property>
     <property name="Depth" type="freetext">
@@ -474,4 +486,76 @@
       <description>Description TBD</description>
     </property>
   </ArchaeologicalElement>
+  <ArchaeologicalElement name="Spit">
+    <description></description>
+    <property name="Spit ID" type="freetext" isIdentifier="true">
+      <description>Description TBD</description>
+    </property>
+    <property name="Bucket Count" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="Thickness" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="Artefact Density" type="freetext" isIdentifier="true">
+      <description>Description TBD</description>
+    </property>
+    <property name="Notes" type="freetext">
+      <description>Description TBD</description>
+    </property>
+  </ArchaeologicalElement>
+
+    <!-- ARCHENT: Photograph log -->
+  <ArchaeologicalElement name="Photograph log">
+    <description>A record of images created and stored on another device, eg by a professional site photographer.</description>
+    <property name="Photograph reference ID" isIdentifier= "true" type="freetext">
+      <description>Unique number or code allocated by creator of the image. It could be a filename or a reference number</description>
+    </property>
+    <property name="Scene type" type="enum">
+      <description>The type of scene captured, eg opening or closing view of the Context. (Vocab: Open, Close, Other)</description>
+      <lookup>
+        <term> {0_No_Observation}<description/> </term>
+        <term> Open
+          <description/>
+        </term>
+        <term> Close
+          <description/>
+        </term>
+        <term> Other
+          <description/>
+        </term>
+      </lookup>
+    </property>
+    <property name="PL Trench ID" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="PL Job Name" type="freetext">
+      <description>Description TBD</description>
+    </property>
+  </ArchaeologicalElement>
+
+    <!-- ARCHENT: Notes -->
+  <ArchaeologicalElement name="Notes">
+    <description>Notes</description>
+    <property name="Note Label" isIdentifier= "true" type="freetext">
+      <description>Label describing note</description>
+    </property>
+    <property name="Note" type="enum">
+      <description>Notes</description>
+    </property>
+    <property name="N Trench ID" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="N Job Name" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="Author" isIdentifier= "true" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="Timestamp" isIdentifier= "true" type="freetext">
+      <description>Description TBD</description>
+    </property>
+  </ArchaeologicalElement>
+
+
 </dataSchema>

@@ -9,7 +9,7 @@ makeLocalID(){
 }
 
 makeLocalID();
-
+onEvent("control", "show", "setIDNull()");
 onEvent("control/Excavation_Data", "show", "refreshTrenchList()");
 onEvent("control/Excavation_Data/newTrench", "click","newTrench()");
 onEvent("control/Excavation_Data/TrenchList", "click", "loadTrench()");
@@ -18,19 +18,41 @@ onEvent("control/Units", "show", "refreshUnitList()");
 onEvent("control/Units/UnitList", "click", "loadUnit()");
 
 refreshTrenchList(){
-    populateList("control/Excavation_Data/TrenchList", fetchEntityList("Trench"));
+    populateList("control/Excavation_Data/TrenchList", 
+        fetchAll("SELECT uuid, group_concat(coalesce(freetext, ''),' - ') as response " +
+        "FROM (select * from latestNonDeletedArchentIdentifiers order by case attributename when 'Job Name' then 1 when 'Trench ID' then 2 end ) " +
+        "WHERE aenttypename = 'Trench' " +
+        "GROUP BY uuid " +
+        "order by response;"));
 }
 
 refreshUnitList(){
-    populateList("control/Units/UnitList", fetchEntityList("Unit"));
+    populateList("control/Units/UnitList",
+        fetchAll("select childuuid, trench.response || ' - ' || unit.response " +
+        "from (select uuid, response from identifierasspreadsheet join latestnondeletedarchent using (uuid) join aenttype using (aenttypeid) where aenttypename = 'Trench') trench join latestnondeletedaentreln parent using (uuid) join latestnondeletedaentreln child using (relationshipid) join  " +
+        "(select uuid as childuuid, response from identifierasspreadsheet join latestnondeletedarchent using (uuid) join aenttype using (aenttypeid) where aenttypename = 'Unit') unit on (child.uuid = childuuid); "));
+}
+
+
+setIDNull() {
+    trench_id = null;
+    unit_id = null;
 }
 
 /*** ARCHENT: Trench ***/
+
+onEvent("Trench/PhotoLog", "show", "loadRelatedPhotologs()");
+onEvent("Trench/PhotoLog/newPhotoLog", "delayclick", "saveTrench(\"newPhotolog();\")");
+onEvent("Trench/PhotoLog/ListPhotoLog", "click", "loadPhotolog();");
+
+onEvent("Trench/Notes", "show", "loadRelatedNotes()");
+onEvent("Trench/Notes/newNote", "delayclick", "saveTrench(\"newNote();\")");
+onEvent("Trench/Notes/ListNotes", "click", "loadNote();");
+
 onEvent("Trench", "show", "showSlopeTab(true)");
 
 onEvent("Trench/Trench_Info/Update", "delayclick", "saveTrench(\"\")");
 onEvent("Trench/Slope/Update", "delayclick", "saveTrench(\"\")");
-onEvent("Trench/Trench_Info/MapDetails", "click", "showTab(\"Trench/Map\")");
 
 onEvent("Trench/Trench_Info/Delete", "delayclick", "deleteTrench()");
 onEvent("Trench/Slope/Delete", "delayclick", "deleteTrench()");
@@ -46,13 +68,20 @@ onEvent("Trench/Units", "show", "refreshRelatedUnits()");
 onEvent("Trench/Units/New_Unit", "delayclick", "saveTrench(\"newUnit()\")");
 onEvent("Trench/Units/Unit_List", "click", "loadUnit()");
 
+onEvent("Trench/Spits", "show", "refreshRelatedSpits()");
+onEvent("Trench/Spits/New_Spit", "delayclick", "saveTrench(\"newSpit()\")");
+onEvent("Trench/Spits/Spit_List", "click", "loadSpit()");
+
 String trench_id = null;
 
 newTrench() {
+    if(isNull(getFieldValue("control/Excavation_Data/Job_Name"))) {
+        showWarning("Validation Error", "You must fill in the Job Name before you can create a Trench");
+        return;
+    }
     trench_id = null;
     newTabGroup("Trench");
     setFieldValue("Trench/Trench_Info/Job_Name", getFieldValue("control/Excavation_Data/Job_Name"));
-    autoNumTrench();
 }
 
 loadTrench() {
@@ -67,6 +96,24 @@ loadTrenchFrom(archentid) {
         return;
     }
     showTabGroup("Trench", trench_id);
+    Object max_unit_id = fetchOne("select max(cast(freetext as integer))+1 from latestnondeletedaentvalue join attributekey using (attributeid) where attributename = 'Unit ID' and uuid in ( " + 
+    "select child.uuid from latestnondeletedaentreln parent join latestnondeletedaentreln child using (relationshipid) " +
+    "where parent.uuid != child.uuid " +
+    "and parent.uuid = " + trench_id + ");").get(0);
+    if(!isNull(max_unit_id)) {
+        fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', "+ max_unit_id +");");
+    } else {
+        fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', 1);");
+    }
+    Object max_spit_id = fetchOne("select max(cast(freetext as integer))+1 from latestnondeletedaentvalue join attributekey using (attributeid) where attributename = 'Spit ID' and uuid in ( " + 
+    "select child.uuid from latestnondeletedaentreln parent join latestnondeletedaentreln child using (relationshipid) " +
+    "where parent.uuid != child.uuid " +
+    "and parent.uuid = " + trench_id + ");").get(0);
+    if(!isNull(max_spit_id)) {
+        fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', "+ max_spit_id +");");
+    } else {
+        fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', 1);");
+    }
 }
 
 saveTrench(String callback) {
@@ -77,6 +124,9 @@ saveTrench(String callback) {
     
     if (!isNull(trench_id)) {
         entity = fetchArchEnt(trench_id);
+    } else {
+        fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', 1);");
+        fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', 1);");
     }
     saveTabGroup("Trench", trench_id, null, null, "trench_id = getLastSavedRecordId();" + callback);
 }
@@ -105,17 +155,6 @@ loadTrenchAttributes() {
     populateDropDown("Trench/Slope/Slope_Detail_2", makeVocab("Slope Detail 2"));
 }
 
-autoNumTrench() {
-    Object next_trench_id = fetchOne("select value from localSettings where key = 'Trench ID';");
-    if (isNull(next_trench_id)){
-        next_trench_id = "1";
-    } else {
-        next_trench_id = next_trench_id.get(0);
-    }
-    setFieldValue("Trench/Trench_Info/Trench_ID", next_trench_id);
-    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Trench ID', "+ next_trench_id +"+1);");
-}
-
 showSlopeTab(Boolean onLoad) {
     for(vocabid : getFieldValue("Trench/Trench_Info/Landform_Element")) {
         if(getVocabName(vocabid.getName()).equals("{bSlope}")) {
@@ -135,7 +174,7 @@ showSlopeTab(Boolean onLoad) {
 refreshRelatedUnits() {
     ArrayList units = new ArrayList();
     if(!isNull(trench_id)) {
-         units = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
+         units = fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
             "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
             "            FROM latestNonDeletedArchentIdentifiers\n"+
             "           WHERE aenttypename = 'Unit'\n"+
@@ -148,12 +187,82 @@ refreshRelatedUnits() {
             "                                                    where uuid = "+trench_id+"\n"+
             "                                                       and relntypeName = 'TrenchUnit')\n"+
             "                             and uuid != "+trench_id+")\n"+
-            "        ORDER BY uuid, attributename ASC)\n"+
+            "        ORDER BY uuid, attributename DESC)\n"+
             "group by uuid\n"+
             "order by valuetimestamp desc, uuid, attributename;");
     }
     populateList("Trench/Units/Unit_List", units);
 }
+
+refreshRelatedSpits() {
+    ArrayList spits = new ArrayList();
+    if(!isNull(trench_id)) {
+         spits = fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
+            "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
+            "            FROM latestNonDeletedArchentIdentifiers\n"+
+            "           WHERE aenttypename = 'Spit'\n"+
+            "             AND uuid in (select uuid\n"+
+            "                            FROM latestNonDeletedAentReln\n"+
+            "                           where relationshipid in (select relationshipid\n"+
+            "                                                      FROM latestNonDeletedAentReln\n"+
+            "                                                      JOIN relationship using (relationshipid)\n"+
+            "                                                      JOIN relntype using (relntypeid)\n"+
+            "                                                    where uuid = "+trench_id+"\n"+
+            "                                                       and relntypeName = 'TrenchSpit')\n"+
+            "                             and uuid != "+trench_id+")\n"+
+            "        ORDER BY uuid, attributename DESC)\n"+
+            "group by uuid\n"+
+            "order by valuetimestamp desc, uuid, attributename;");
+    }
+    populateList("Trench/Spits/Spit_List", spits);
+}
+
+loadRelatedPhotologs() {
+    Object photologs = new ArrayList();
+    if (!isNull(trench_id)){
+        photologs = fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
+            "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
+            "            FROM latestNonDeletedArchentIdentifiers\n"+
+            "           WHERE aenttypename = 'Photograph log'\n"+
+            "             AND uuid in (select uuid\n"+
+            "                            FROM latestNonDeletedAentReln\n"+
+            "                           where relationshipid in (select relationshipid\n"+
+            "                                                      FROM latestNonDeletedAentReln\n"+
+            "                                                      JOIN relationship using (relationshipid)\n"+
+            "                                                      JOIN relntype using (relntypeid)\n"+
+            "                                                     where uuid = "+trench_id+"\n"+
+            "                                                       and relntypeName = 'TrenchPhotographLog')\n"+
+            "                             and uuid != "+trench_id+")\n"+
+            "        ORDER BY uuid, attributename ASC)\n"+
+            "group by uuid\n"+
+            "order by valuetimestamp desc, uuid, attributename;");
+    }
+    populateList("Trench/PhotoLog/ListPhotoLog",  photologs);
+}
+
+loadRelatedNotes() {
+    Object notes = new ArrayList();
+    if (!isNull(trench_id)){
+        notes = fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
+            "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
+            "            FROM latestNonDeletedArchentIdentifiers\n"+
+            "           WHERE aenttypename = 'Notes'\n"+
+            "             AND uuid in (select uuid\n"+
+            "                            FROM latestNonDeletedAentReln\n"+
+            "                           where relationshipid in (select relationshipid\n"+
+            "                                                      FROM latestNonDeletedAentReln\n"+
+            "                                                      JOIN relationship using (relationshipid)\n"+
+            "                                                      JOIN relntype using (relntypeid)\n"+
+            "                                                     where uuid = "+trench_id+"\n"+
+            "                                                       and relntypeName = 'TrenchNote')\n"+
+            "                             and uuid != "+trench_id+")\n"+
+            "        ORDER BY uuid, attributename ASC)\n"+
+            "group by uuid\n"+
+            "order by valuetimestamp desc, uuid, attributename;");
+    }
+    populateList("Trench/Notes/ListNotes", notes);
+}
+
 /*** ARCHENT: Unit ***/
 onEvent("Unit", "show", "showGrassRootsTab(true)");
 
@@ -194,13 +303,20 @@ loadUnitFrom(archentid) {
 }
 
 saveUnit(String callback) {
-    if (isNull(getFieldValue("Unit/Soil/Unit_ID"))) {
-        showWarning("Validation Error", "Cannot save Unit without ID");
+    if (isNull(getFieldValue("Unit/Soil/Unit_ID")) || isNull(getFieldValue("Unit/Soil/Horizon"))) {
+        showWarning("Validation Error", "Cannot save Unit without ID or Horizon");
         return;
     }
     
     if (!isNull(unit_id)) {
         entity = fetchArchEnt(unit_id);
+    } else {
+        next_unit_id = fetchOne("select value from localSettings where key = 'Unit';").get(0);
+        if(Integer.parseInt(getFieldValue("Unit/Soil/Unit_ID")) >= Integer.parseInt(next_unit_id)) {
+            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', "+ getFieldValue("Unit/Soil/Unit_ID") +"+1);");
+        } else {
+            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', "+ next_unit_id +");");    
+        }
     }
     saveTabGroup("Unit", unit_id, null, null, "unit_id = getLastSavedRecordId(); saveEntitiesToRel(\"TrenchUnit\", trench_id, unit_id);" + callback);
 }
@@ -232,14 +348,8 @@ loadUnitAttributes() {
 }
 
 autoNumUnit() {
-    Object next_unit_id = fetchOne("select value from localSettings where key = 'Unit';");
-    if (isNull(next_unit_id)){
-        next_unit_id = "1";
-    } else {
-        next_unit_id = next_unit_id.get(0);
-    }
-    setFieldValue("Unit/Soil/Unit_ID", next_unit_id);
-    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', "+ next_unit_id +"+1);");
+    next_unit_id = fetchOne("select value from localSettings where key = 'Unit';").get(0);
+    setFieldValue("Unit/Soil/Unit_ID", next_unit_id); 
 }
 
 showGrassRootsTab(Boolean onLoad) {
@@ -254,6 +364,209 @@ showGrassRootsTab(Boolean onLoad) {
         cancelTab("Unit/Grass_Roots", false);
     }
     return;
+}
+
+/*** ARCHENT: Unit ***/
+onEvent("Spit/Spit_Info/Update", "delayclick", "saveSpit(\"\")");
+onEvent("Spit/Spit_Info/Delete", "delayclick", "deleteSpit()");
+
+String spit_id = null;
+
+newSpit() {
+    spit_id = null;
+    newTabGroup("Spit");
+    autoNumSpit();
+}
+
+loadSpit() {
+    spit_id = getListItemValue();
+    loadSpitFrom(spit_id);
+}
+
+loadSpitFrom(archentid) {
+    spit_id = archentid;
+    if (isNull(spit_id)) {
+        showToast("No Spit selected");
+        return;
+    }
+    showTabGroup("Spit", spit_id);
+}
+
+saveSpit(String callback) {
+    if (isNull(getFieldValue("Spit/Spit_Info/Spit_ID"))) {
+        showWarning("Validation Error", "Cannot save Spit without ID");
+        return;
+    }
+    
+    if (!isNull(spit_id)) {
+        entity = fetchArchEnt(spit_id);
+    } else {
+        next_spit_id = fetchOne("select value from localSettings where key = 'Spit';").get(0);
+        if(Integer.parseInt(getFieldValue("Spit/Spit_Info/Spit_ID")) >= Integer.parseInt(next_spit_id)) {
+            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', "+ getFieldValue("Spit/Spit_Info/Spit_ID") +"+1);");
+        } else {
+            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', "+ next_spit_id +");");
+        }
+    }
+    saveTabGroup("Spit", spit_id, null, null, "spit_id = getLastSavedRecordId(); saveEntitiesToRel(\"TrenchSpit\", trench_id, spit_id);" + callback);
+}
+
+deleteSpit() {
+    if (!isNull(spit_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Spit!", "reallyDeleteSpit()", "doNotDelete()");
+    } else {
+        cancelTabGroup("Spit", true);
+    }
+}
+
+reallyDeleteSpit() {
+    deleteArchEnt(spit_id);
+    cancelTabGroup("Spit", false);
+}
+
+autoNumSpit() {
+    next_spit_id = fetchOne("select value from localSettings where key = 'Spit';").get(0);
+    setFieldValue("Spit/Spit_Info/Spit_ID", next_spit_id); 
+}
+
+/*** Photolog Stuff ***/
+onEvent("Photograph_log/Photograph_log/Update", "delayclick", "savePhotolog(\"\")");
+onEvent("Photograph_log/Photograph_log/Duplicate", "delayclick", "savePhotolog(\"photolog_id=null;\")");
+onEvent("Photograph_log/Photograph_log/New", "delayclick", "savePhotolog(\"newPhotolog();\")");
+onEvent("Photograph_log/Photograph_log/Close", "delayclick", "savePhotolog(\"closePhotoLog();\")");
+onEvent("Photograph_log/Photograph_log/Delete", "delayclick", "deletePhotolog()");
+
+String photolog_id;
+
+newPhotolog(){
+    photolog_id = null;
+    newTabGroup("Photograph_log");
+    date = fetchOne("select datetime('now', 'localtime');");
+    setFieldValue("Photograph_log/Photograph_log/Creation_Date", date.get(0));
+    setFieldValue("Photograph_log/Photograph_log/Created_By", username);
+    setFieldValue("Photograph_log/Photograph_log/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
+    setFieldValue("Photograph_log/Photograph_log/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
+
+    //setFieldValue("Photograph_log/Photograph_log/Photograph_reference_ID", getCounter("Photograph log"));
+}
+
+loadPhotolog() {
+    archent_id = getListItemValue();
+    loadPhotologFrom(archent_id);
+}
+
+loadPhotologFrom(archent_id) {
+    photolog_id = archent_id;
+    if (isNull(photolog_id)) {
+        showToast("No record selected");
+        return;
+    }
+    
+    showTabGroup("Photograph_log", photolog_id);
+    Object foo = fetchOne("select fname || ' ' || lname from user join archentity using (userid) where uuid = '"+photolog_id+"' group by uuid having min(aenttimestamp)");
+    setFieldValue("Photograph_log/Photograph_log/Created_By", foo.get(0));
+    Object bar = fetchOne("select uuid, datetime(aentTimestamp, 'localtime')  from archentity where uuid = '"+photolog_id+"' group by uuid having min(aenttimestamp);");
+    setFieldValue("Photograph_log/Photograph_log/Creation_Date", bar.get(1));
+}
+
+savePhotolog(String callback) {
+    if (isNull(getFieldValue("Photograph_log/Photograph_log/Photograph_reference_ID"))) {
+        showWarning("Validation Error", "Cannot save Photo log without Photograph Reference ID");
+        return;
+    }
+    if (!isNull(photolog_id)) {
+        entity = fetchArchEnt(photolog_id);
+    }
+    if(!isNull(trench_id)) {
+        saveTabGroup("Photograph_log", photolog_id, null, null, "photolog_id = getLastSavedRecordId();saveEntitiesToRel(\"TrenchPhotographLog\", trench_id, photolog_id);" + callback);    
+    } else {
+        saveTabGroup("Photograph_log", photolog_id, null, null, "photolog_id = getLastSavedRecordId();" + callback);
+    }
+    
+}
+
+closePhotoLog() {
+    cancelTabGroup("Photograph_log", false);
+}
+
+deletePhotolog(){
+    if (!isNull(photolog_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Photolog Record!", "reallyDeletePhotolog()", "doNotDelete()");
+    } else {
+        cancelTabGroup("Photograph_log", true);
+    }
+}
+
+reallyDeletePhotolog(){
+    deleteArchEnt(photolog_id);
+    cancelTabGroup("Photograph_log", false);
+}
+
+/*** Note Stuff ***/
+onEvent("Notes/Notes/Update", "delayclick", "saveNote(\"\")");
+onEvent("Notes/Notes/Duplicate", "delayclick", "saveNote(\"note_id=null;\")");
+onEvent("Notes/Notes/New", "delayclick", "saveNote(\"newNote();\")");
+onEvent("Notes/Notes/Close", "delayclick", "saveNote(\"closeNote();\")");
+onEvent("Notes/Notes/Delete", "delayclick", "deleteNote()");
+
+String note_id;
+
+newNote(){
+    note_id = null;
+    newTabGroup("Notes");
+    date = fetchOne("select datetime('now', 'localtime');");
+    setFieldValue("Notes/Notes/Creation_Date", date.get(0));
+    setFieldValue("Notes/Notes/Created_By", username);
+    setFieldValue("Notes/Notes/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
+    setFieldValue("Notes/Notes/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
+}
+
+loadNote() {
+    archent_id = getListItemValue();
+    loadNoteFrom(archent_id);
+}
+
+loadNoteFrom(archent_id) {
+    note_id = archent_id;
+    if (isNull(note_id)) {
+        showToast("No record selected");
+        return;
+    }
+    
+    showTabGroup("Notes", note_id);
+}
+
+saveNote(String callback) {
+    if (isNull(getFieldValue("Notes/Notes/Note_Label"))) {
+        showWarning("Validation Error", "Cannot save Note without Note Label");
+        return;
+    }
+    if (!isNull(note_id)) {
+        entity = fetchArchEnt(note_id);
+    }
+    if(!isNull(trench_id)) {
+        saveTabGroup("Notes", note_id, null, null, "note_id = getLastSavedRecordId();saveEntitiesToRel(\"TrenchNote\", trench_id, note_id);" + callback);    
+    } else {
+        saveTabGroup("Notes", note_id, null, null, "note_id = getLastSavedRecordId();" + callback);
+    }
+    
+}
+
+closeNote() {
+    cancelTabGroup("Notes", false);
+}
+
+deleteNote(){
+    if (!isNull(note_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Note Record!", "reallyDeleteNote()", "doNotDelete()");
+    } else {
+        cancelTabGroup("Notes", true);
+    }
+}
+
+reallyDeleteNote(){
+    deleteArchEnt(note_id);
+    cancelTabGroup("Notes", false);
 }
 
 /*** MISC ***/
@@ -309,7 +622,8 @@ fillInGPS(String path) {
     }
 }
 
-/***Map stuff ***/
+/*** Map stuff gone for now
+//Map stuff
 DATA_ENTRY_LAYER = "Data Entry Layer";
 DATA_ENTRY_LAYER_ID = 0;
 
@@ -322,6 +636,17 @@ initMap() {
 }
 
 initMap();
+***/
+
+//Checking they have the correct projection EPSG:28355: GDA94 / MGA zone 55
+
+// checkProjection(){
+//     if(!getModuleSrid().equals("28355")){
+//         showWarning("Warning","It appears that you are using the wrong module projection. To correct this, do the following:\n1. Open the web app.\n2. Open this module.\n3. Click edit module.\n4. Change the value in the \"Module SRID:\" to 28355: GDA94 / MGA zone 55.");
+//     }
+// }
+
+// checkProjection();
 
 /*** USER ***/
 
