@@ -83,6 +83,7 @@ newTrench() {
     trench_id = null;
     newTabGroup("Trench");
     setFieldValue("Trench/Trench_Info/Job_Name", getFieldValue("control/Excavation_Data/Job_Name"));
+    setFieldValue("Trench/Trench_Info/Author", username);
 }
 
 loadTrench() {
@@ -268,18 +269,16 @@ loadRelatedNotes() {
 onEvent("Unit", "show", "showGrassRootsTab(true)");
 
 onEvent("Unit/Soil/Update_And_New", "delayclick", "saveUnit(\"newUnit()\")");
-onEvent("Unit/Grass_Roots/Update_And_New", "delayclick", "saveUnit(\"newUnit()\")");
 onEvent("Unit/Add/Update_And_New", "delayclick", "saveUnit(\"newUnit()\")");
 
 onEvent("Unit/Soil/Update_And_Close", "delayclick", "saveUnit(\"cancelTabGroup(\\\"Unit\\\",false);showTab(\\\"Trench/Units\\\");\")");
-onEvent("Unit/Grass_Roots/Update_And_Close", "delayclick", "saveUnit(\"cancelTabGroup(\\\"Unit\\\",false);showTab(\\\"Trench/Units\\\");\")");
 onEvent("Unit/Add/Update_And_Close", "delayclick", "saveUnit(\"cancelTabGroup(\\\"Unit\\\",false);showTab(\\\"Trench/Units\\\");\")");
 
 onEvent("Unit/Soil/Delete", "delayclick", "deleteUnit()");
-onEvent("Unit/Grass_Roots/Delete", "delayclick", "deleteUnit()");
 onEvent("Unit/Add/Delete", "delayclick", "deleteUnit()");
 
 onEvent("Unit/Soil/Fill_Grass_Roots_Details", "click", "showGrassRootsTab(false)");
+onEvent("Unit/Grass_Roots/Back", "delayclick", "saveUnit(\"showTab(\\\"Unit/Soil\\\");\")");
 
 onEvent("Unit/Add/Take_Photo", "click", "attachPictureTo(\"Unit/Add/Photos\")");
 onEvent("Unit/Add/Attach_Sketches", "click", "attachFileTo(\"Unit/Add/Sketches\")");
@@ -333,8 +332,8 @@ deleteUnit() {
     if (!isNull(unit_id)) {
         showAlert("Confirm Deletion", "Press OK to Delete this Unit!", "reallyDeleteUnit()", "doNotDelete()");
     } else {
-        cancelTabGroup("Unit", true);
-        if(isNull(trench_id)) {
+        cancelTabGroup("Unit", false);
+        if(!isNull(trench_id)) {
             showTab("Trench/Units");
         }
     }
@@ -343,7 +342,7 @@ deleteUnit() {
 reallyDeleteUnit() {
     deleteArchEnt(unit_id);
     cancelTabGroup("Unit", false);
-    if(isNull(trench_id)) {
+    if(!isNull(trench_id)) {
         showTab("Trench/Units");
     }
 }
@@ -354,7 +353,7 @@ loadUnitAttributes() {
     populateDropDown("Unit/Soil/Grain_size", makeVocab("Grain size"));
     populateDropDown("Unit/Soil/Consistency", makeVocab("Consistency"));
     populateDropDown("Unit/Soil/Cementation", makeVocab("Cementation"));
-    populateDropDown("Unit/Soil/Inclusions", makeVocab("Inclusions"));
+    populateCheckBoxGroup("Unit/Soil/Inclusions", makeVocab("Inclusions"));
     populateCheckBoxGroup("Unit/Soil/Distubance", makeVocab("Distubance"));
     populateRadioGroup("Unit/Soil/Artefacts", makeVocab("Artefacts"));
     populateDropDown("Unit/Grass_Roots/Root_Size", makeVocab("Root Size"));
@@ -367,9 +366,11 @@ autoNumUnit() {
 }
 
 showGrassRootsTab(Boolean onLoad) {
-    if(getVocabName(getFieldValue("Unit/Soil/Inclusions")).equals("{bGrass_roots}")) {
-        showTab("Unit/Grass_Roots");
-        return;
+    for(vocabid : getFieldValue("Unit/Soil/Inclusions")) {
+        if(getVocabName(vocabid.getName()).equals("{bGrass_roots}")) {
+            showTab("Unit/Grass_Roots");
+            return;
+        }
     }
     if(!onLoad) {
         showToast("Grass Roots was not selected in Inclusions");

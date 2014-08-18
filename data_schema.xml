@@ -21,6 +21,9 @@
     <property name="Job Name" type="freetext" isIdentifier="true">
       <description>Description TBD</description>
     </property>
+    <property name="T Author" type="freetext" isIdentifier="true">
+      <description>Description TBD</description>
+    </property>    
     <property name="Latitude" type="freetext">
       <description>Description TBD</description>
     </property>
@@ -252,53 +255,47 @@
         <term> {0No_Observation}
           <description>Description TBD</description>
         </term>
-        <term> {Clayey}
+        <term> {aClay}
           <description>Description TBD</description>
-          <term> {Loam}
-            <description>Description TBD</description>
-          </term>
-          <term> {Sand}
-            <description>Description TBD</description>
-          </term>
-          <term> {Silt}
-            <description>Description TBD</description>
-          </term>
         </term>
-        <term> {Loamy}
+        <term> {bSand}
           <description>Description TBD</description>
-          <term> {Clay}
-            <description>Description TBD</description>
-          </term>
-          <term> {Sand}
-            <description>Description TBD</description>
-          </term>
-          <term> {Silt}
-            <description>Description TBD</description>
-          </term>
         </term>
-        <term> {Sandy}
+        <term> {cLoam}
           <description>Description TBD</description>
-          <term> {Clay}
-            <description>Description TBD</description>
-          </term>
-          <term> {Loam}
-            <description>Description TBD</description>
-          </term>
-          <term> {Silt}
-            <description>Description TBD</description>
-          </term>
         </term>
-        <term> {Silty}
+        <term> {dLoamy_sand}
           <description>Description TBD</description>
-          <term> {Clay}
-            <description>Description TBD</description>
-          </term>
-          <term> {Loam}
-            <description>Description TBD</description>
-          </term>
-          <term> {Sand}
-            <description>Description TBD</description>
-          </term>
+        </term>
+        <term> {eClayey_sand}
+          <description>Description TBD</description>
+        </term>
+        <term> {fSandy_loam}
+          <description>Description TBD</description>
+        </term>
+        <term> {gSilty_loam}
+          <description>Description TBD</description>
+        </term>
+        <term> {hSandy_clay_loam}
+          <description>Description TBD</description>
+        </term>
+        <term> {iClay_loam}
+          <description>Description TBD</description>
+        </term>
+        <term> {jClay_loam_sandy}
+          <description>Description TBD</description>
+        </term>
+        <term> {kSilty_clay_loam}
+          <description>Description TBD</description>
+        </term>
+        <term> {lSilty_clay}
+          <description>Description TBD</description>
+        </term>
+        <term> {mSandy_clay}
+          <description>Description TBD</description>
+        </term>
+        <term> {nSilty_sand}
+          <description>Description TBD</description>
         </term>
       </lookup>
     </property>

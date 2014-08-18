@@ -46,6 +46,7 @@
           <Trench>
             <Trench_Info>
               <Job_Name/>
+              <Author/>
               <Trench_ID/>
               <container1>
                 <child1>
@@ -109,6 +110,9 @@
           </Trench>
           <Unit>
             <Soil>
+              <Job_Name/>
+              <Trench_ID/>
+              <Author/>
               <Unit_ID/>
               <Horizon/>
               <Depth/>
@@ -124,9 +128,6 @@
               <Distubance/>
               <Artefacts/>
               <Notes/>
-              <Job_Name/>
-              <Trench_ID/>
-              <Author/>
               <Update_And_New/>
               <Update_And_Close/>
               <Delete/>
@@ -134,9 +135,7 @@
             <Grass_Roots>
               <Root_Size/>
               <Root_Abundance/>
-              <Update_And_New/>
-              <Update_And_Close/>
-              <Delete/>
+              <Back/>
             </Grass_Roots>
             <Add>
               <Photos/>
@@ -151,14 +150,14 @@
           </Unit>
           <Spit>
             <Spit_Info>
+              <Job_Name/>
+              <Trench_ID/>
+              <Author/>
               <Spit_ID/>
               <Bucket_Count/>
               <Thickness/>
               <Artefact_Density/>
               <Notes/>
-              <Job_Name/>
-              <Trench_ID/>
-              <Author/>
               <Update_And_New/>
               <Update_And_Close/>
               <Delete/>
@@ -166,12 +165,12 @@
           </Spit>
           <Photograph_log>
             <Photograph_log>
+              <Job_Name/>
+              <Trench_ID/>
+              <Created_By/>
+              <Creation_Date/>
               <Photograph_reference_ID/>
               <Scene_type/>
-              <Trench_ID/>
-              <Job_Name/>
-              <Creation_Date/>
-              <Created_By/>
               <New/>
               <Close/>
               <Delete/>
@@ -180,12 +179,12 @@
 
           <Notes>
             <Notes>
-              <Note_Label/>
-              <Note/>
-              <Trench_ID/>
               <Job_Name/>
-              <Creation_Date/>
+              <Trench_ID/>
               <Created_By/>
+              <Creation_Date/>
+              <Note_Label/>
+              <Note/>>
               <Update/>
               <Duplicate/>
               <New/>
@@ -294,6 +293,9 @@
         <label>{Trench_Info}</label>
         <input ref="Job_Name" faims_attribute_name="Job Name" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Job_Name}</label>
+        </input>
+        <input ref="Author" faims_attribute_name="T Author" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Author}</label>
         </input>
         <input ref="Trench_ID" faims_attribute_name="Trench ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
           <label>{Trench_ID}</label>
@@ -501,6 +503,15 @@
       <label>{Unit}</label>
       <group ref="Soil">
         <label>{Soil}</label>
+        <input ref="Job_Name" faims_attribute_name="Unit Job Name" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Job_Name}</label>
+        </input>
+        <input ref="Trench_ID" faims_attribute_name="Unit Trench ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Trench_ID}</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Unit Author" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Author}</label>
+        </input> 
         <input ref="Unit_ID" faims_attribute_name="Unit ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
           <label>{Unit_ID}</label>
         </input>
@@ -551,13 +562,13 @@
             <value>placeholder</value>
           </item>
         </select1>
-        <select1 ref="Inclusions" faims_attribute_name="Inclusions" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+        <select ref="Inclusions" faims_attribute_name="Inclusions" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Inclusions}</label>
           <item>
             <label>placeholder</label>
             <value>placeholder</value>
           </item>
-        </select1>
+        </select>
         <trigger ref="Fill_Grass_Roots_Details">
           <label>{Fill_Grass_Roots_Details}</label>
         </trigger>
@@ -577,16 +588,7 @@
         </select1>
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
           <label>{Notes}</label>
-        </input>
-        <input ref="Job_Name" faims_attribute_name="Unit Job Name" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
-          <label>{Job_Name}</label>
-        </input>
-        <input ref="Trench_ID" faims_attribute_name="Unit Trench ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
-          <label>{Trench_ID}</label>
-        </input>
-        <input ref="Author" faims_attribute_name="Unit Author" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
-          <label>{Trench_ID}</label>
-        </input>   
+        </input>  
         <trigger ref="Update_And_New">
           <label>{Save_And_New_Unit}</label>
         </trigger>
@@ -613,14 +615,8 @@
             <value>placeholder</value>
           </item>
         </select1>
-        <trigger ref="Update_And_New">
-          <label>{Save_And_New_Unit}</label>
-        </trigger>
-        <trigger ref="Update_And_Close">
-          <label>{Save_And_Close_Unit}</label>
-        </trigger>
-        <trigger ref="Delete">
-          <label>{Delete_Unit}</label>
+        <trigger ref="Back">
+          <label>{Back}</label>
         </trigger>
       </group>
       <group ref="Add" faims_hidden="true">
@@ -663,6 +659,15 @@
       <label>Spit</label>
       <group ref="Spit_Info">
         <label>Spit Info</label>
+        <input ref="Job_Name" faims_attribute_name="Spit Job Name" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Job_Name}</label>
+        </input>
+        <input ref="Trench_ID" faims_attribute_name="Spit Trench ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Trench_ID}</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Spit Author" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Author}</label>
+        </input> 
         <input ref="Spit_ID" faims_attribute_name="Spit ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
           <label>{Spit_ID}</label>
         </input>
@@ -677,16 +682,7 @@
         </input>
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
           <label>{Notes}</label>
-        </input>
-        <input ref="Job_Name" faims_attribute_name="Spit Job Name" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
-          <label>{Job_Name}</label>
-        </input>
-        <input ref="Trench_ID" faims_attribute_name="Spit Trench ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
-          <label>{Trench_ID}</label>
-        </input>
-        <input ref="Author" faims_attribute_name="Spit Author" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
-          <label>{Trench_ID}</label>
-        </input>        
+        </input>       
         <trigger ref="Update_And_New">
           <label>{Save_And_New_Spit}</label>
         </trigger>
@@ -705,23 +701,23 @@
       <label>{Photograph_Log}</label>
       <group ref="Photograph_log">
         <label>{Photograph_Log}</label>
+        <input faims_certainty="false" faims_read_only="true" ref="Job_Name" faims_attribute_name="PL Job Name" faims_attribute_type="freetext">
+          <label>{Job_Name}</label>
+        </input>  
+         <input faims_certainty="false" faims_read_only="true" ref="Trench_ID" faims_attribute_name="PL Trench ID" faims_attribute_type="freetext">
+          <label>{Trench_ID}</label>
+        </input>
+        <input faims_certainty="false" faims_read_only="true" ref="Created_By">
+          <label>{Author}</label>
+        </input>
+        <input faims_certainty="false" faims_read_only="true" ref="Creation_Date">
+          <label>{Timestamp}</label>
+        </input>
         <input faims_attribute_name="Photograph reference ID" faims_attribute_type="freetext" faims_read_only="false" ref="Photograph_reference_ID" faims_certainty="true">
           <label>{Photograph_Log_ID}</label>
         </input>
         <input faims_attribute_name="Scene type" faims_attribute_type="freetext" faims_certainty="true" faims_read_only="false" ref="Scene_type">
           <label>{Description}</label>
-        </input>
-         <input faims_certainty="false" faims_read_only="true" ref="Trench_ID" faims_attribute_name="PL Trench ID" faims_attribute_type="freetext">
-          <label>{Trench_ID}</label>
-        </input>
-        <input faims_certainty="false" faims_read_only="true" ref="Job_Name" faims_attribute_name="PL Job Name" faims_attribute_type="freetext">
-          <label>{Job_Name}</label>
-        </input>       
-        <input faims_certainty="false" faims_read_only="true" ref="Creation_Date">
-          <label>{Timestamp}</label>
-        </input>
-        <input faims_certainty="false" faims_read_only="true" ref="Created_By">
-          <label>{Author}</label>
         </input>
         <trigger ref="New">
           <label>Save and New {Photograph_Log}</label>
@@ -736,28 +732,28 @@
     </group>
 
 
-      <!-- ArchEnt: Photograph Log -->
+      <!-- ArchEnt: Notes -->
     <group ref="Notes" faims_archent_type="Notes">
       <label>{Notes}</label>
       <group ref="Notes">
         <label>{Notes}</label>
+        <input faims_certainty="false" faims_read_only="true" ref="Job_Name" faims_attribute_name="N Job Name" faims_attribute_type="freetext">
+          <label>{Job_Name}</label>
+        </input>    
+         <input faims_certainty="false" faims_read_only="true" ref="Trench_ID" faims_attribute_name="N Trench ID" faims_attribute_type="freetext">
+          <label>{Trench_ID}</label>
+        </input>   
+        <input faims_certainty="false" faims_read_only="true" ref="Created_By" faims_attribute_name="Author" faims_attribute_type="freetext">
+          <label>{Author}</label>
+        </input>
+        <input faims_certainty="false" faims_read_only="true" ref="Creation_Date" faims_attribute_name="Timestamp" faims_attribute_type="freetext">
+          <label>{Timestamp}</label>
+        </input>
         <input faims_attribute_name="Note Label" faims_attribute_type="freetext" faims_read_only="false" ref="Note_Label" faims_certainty="true">
           <label>{Note_Label}</label>
         </input>
         <input faims_attribute_name="Note" faims_attribute_type="freetext" faims_certainty="true" faims_read_only="false" ref="Note">
           <label>{Note}</label>
-        </input>
-         <input faims_certainty="false" faims_read_only="true" ref="Trench_ID" faims_attribute_name="N Trench ID" faims_attribute_type="freetext">
-          <label>{Trench_ID}</label>
-        </input>
-        <input faims_certainty="false" faims_read_only="true" ref="Job_Name" faims_attribute_name="N Job Name" faims_attribute_type="freetext">
-          <label>{Job_Name}</label>
-        </input>       
-        <input faims_certainty="false" faims_read_only="true" ref="Creation_Date" faims_attribute_name="Timestamp" faims_attribute_type="freetext">
-          <label>{Timestamp}</label>
-        </input>
-        <input faims_certainty="false" faims_read_only="true" ref="Created_By" faims_attribute_name="Author" faims_attribute_type="freetext">
-          <label>{Author}</label>
         </input>
         <trigger ref="New">
           <label>Save and New {Note}</label>
