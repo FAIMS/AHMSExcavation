@@ -479,6 +479,15 @@
     <property name="Notes" type="freetext">
       <description>Description TBD</description>
     </property>
+    <property name="Unit Job Name" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="Unit Trench ID" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="Unit Author" type="freetext">
+      <description>Description TBD</description>
+    </property>
     <property name="Photos" type="file">
       <description>Description TBD</description>
     </property>
@@ -501,6 +510,15 @@
       <description>Description TBD</description>
     </property>
     <property name="Notes" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="Spit Job Name" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="Spit Trench ID" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="Spit Author" type="freetext">
       <description>Description TBD</description>
     </property>
   </ArchaeologicalElement>

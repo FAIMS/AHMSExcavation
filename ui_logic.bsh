@@ -52,6 +52,7 @@ onEvent("Trench/Notes/ListNotes", "click", "loadNote();");
 onEvent("Trench", "show", "showSlopeTab(true)");
 
 onEvent("Trench/Trench_Info/Update", "delayclick", "saveTrench(\"\")");
+onEvent("Trench/Trench_Info/Update_And_New", "delayclick", "saveTrench(\"newTrench()\")");
 onEvent("Trench/Slope/Update", "delayclick", "saveTrench(\"\")");
 
 onEvent("Trench/Trench_Info/Delete", "delayclick", "deleteTrench()");
@@ -174,7 +175,7 @@ showSlopeTab(Boolean onLoad) {
 refreshRelatedUnits() {
     ArrayList units = new ArrayList();
     if(!isNull(trench_id)) {
-         units = fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
+         units = fetchAll("select uuid, aenttypename || ' ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
             "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
             "            FROM latestNonDeletedArchentIdentifiers\n"+
             "           WHERE aenttypename = 'Unit'\n"+
@@ -197,7 +198,7 @@ refreshRelatedUnits() {
 refreshRelatedSpits() {
     ArrayList spits = new ArrayList();
     if(!isNull(trench_id)) {
-         spits = fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
+         spits = fetchAll("select uuid, aenttypename || ' ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
             "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
             "            FROM latestNonDeletedArchentIdentifiers\n"+
             "           WHERE aenttypename = 'Spit'\n"+
@@ -266,9 +267,13 @@ loadRelatedNotes() {
 /*** ARCHENT: Unit ***/
 onEvent("Unit", "show", "showGrassRootsTab(true)");
 
-onEvent("Unit/Soil/Update", "delayclick", "saveUnit(\"\")");
-onEvent("Unit/Grass_Roots/Update", "delayclick", "saveUnit(\"\")");
-onEvent("Unit/Add/Update", "delayclick", "saveUnit(\"\")");
+onEvent("Unit/Soil/Update_And_New", "delayclick", "saveUnit(\"newUnit()\")");
+onEvent("Unit/Grass_Roots/Update_And_New", "delayclick", "saveUnit(\"newUnit()\")");
+onEvent("Unit/Add/Update_And_New", "delayclick", "saveUnit(\"newUnit()\")");
+
+onEvent("Unit/Soil/Update_And_Close", "delayclick", "saveUnit(\"cancelTabGroup(\\\"Unit\\\",false);showTab(\\\"Trench/Units\\\");\")");
+onEvent("Unit/Grass_Roots/Update_And_Close", "delayclick", "saveUnit(\"cancelTabGroup(\\\"Unit\\\",false);showTab(\\\"Trench/Units\\\");\")");
+onEvent("Unit/Add/Update_And_Close", "delayclick", "saveUnit(\"cancelTabGroup(\\\"Unit\\\",false);showTab(\\\"Trench/Units\\\");\")");
 
 onEvent("Unit/Soil/Delete", "delayclick", "deleteUnit()");
 onEvent("Unit/Grass_Roots/Delete", "delayclick", "deleteUnit()");
@@ -286,6 +291,9 @@ newUnit() {
     unit_id = null;
     newTabGroup("Unit");
     autoNumUnit();
+    setFieldValue("Unit/Soil/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
+    setFieldValue("Unit/Soil/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
+    setFieldValue("Unit/Soil/Author", username);
 }
 
 loadUnit() {
@@ -326,12 +334,18 @@ deleteUnit() {
         showAlert("Confirm Deletion", "Press OK to Delete this Unit!", "reallyDeleteUnit()", "doNotDelete()");
     } else {
         cancelTabGroup("Unit", true);
+        if(isNull(trench_id)) {
+            showTab("Trench/Units");
+        }
     }
 }
 
 reallyDeleteUnit() {
     deleteArchEnt(unit_id);
     cancelTabGroup("Unit", false);
+    if(isNull(trench_id)) {
+        showTab("Trench/Units");
+    }
 }
 
 loadUnitAttributes() {
@@ -367,7 +381,8 @@ showGrassRootsTab(Boolean onLoad) {
 }
 
 /*** ARCHENT: Unit ***/
-onEvent("Spit/Spit_Info/Update", "delayclick", "saveSpit(\"\")");
+onEvent("Spit/Spit_Info/Update_And_New", "delayclick", "saveSpit(\"newSpit()\")");
+onEvent("Spit/Spit_Info/Update_And_Close", "delayclick", "saveSpit(\"cancelTabGroup(\\\"Spit\\\", false);showTab(\\\"Trench/Spits\\\")\")");
 onEvent("Spit/Spit_Info/Delete", "delayclick", "deleteSpit()");
 
 String spit_id = null;
@@ -376,6 +391,9 @@ newSpit() {
     spit_id = null;
     newTabGroup("Spit");
     autoNumSpit();
+    setFieldValue("Spit/Spit_Info/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
+    setFieldValue("Spit/Spit_Info/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
+    setFieldValue("Spit/Spit_Info/Author", username);
 }
 
 loadSpit() {
@@ -416,12 +434,14 @@ deleteSpit() {
         showAlert("Confirm Deletion", "Press OK to Delete this Spit!", "reallyDeleteSpit()", "doNotDelete()");
     } else {
         cancelTabGroup("Spit", true);
+        showTab("Trench/Spit");   
     }
 }
 
 reallyDeleteSpit() {
     deleteArchEnt(spit_id);
     cancelTabGroup("Spit", false);
+    showTab("Trench/Spit");
 }
 
 autoNumSpit() {
@@ -430,8 +450,6 @@ autoNumSpit() {
 }
 
 /*** Photolog Stuff ***/
-onEvent("Photograph_log/Photograph_log/Update", "delayclick", "savePhotolog(\"\")");
-onEvent("Photograph_log/Photograph_log/Duplicate", "delayclick", "savePhotolog(\"photolog_id=null;\")");
 onEvent("Photograph_log/Photograph_log/New", "delayclick", "savePhotolog(\"newPhotolog();\")");
 onEvent("Photograph_log/Photograph_log/Close", "delayclick", "savePhotolog(\"closePhotoLog();\")");
 onEvent("Photograph_log/Photograph_log/Delete", "delayclick", "deletePhotolog()");
@@ -503,8 +521,6 @@ reallyDeletePhotolog(){
 }
 
 /*** Note Stuff ***/
-onEvent("Notes/Notes/Update", "delayclick", "saveNote(\"\")");
-onEvent("Notes/Notes/Duplicate", "delayclick", "saveNote(\"note_id=null;\")");
 onEvent("Notes/Notes/New", "delayclick", "saveNote(\"newNote();\")");
 onEvent("Notes/Notes/Close", "delayclick", "saveNote(\"closeNote();\")");
 onEvent("Notes/Notes/Delete", "delayclick", "deleteNote()");
@@ -554,6 +570,7 @@ saveNote(String callback) {
 
 closeNote() {
     cancelTabGroup("Notes", false);
+    showTab("Trench/Notes");
 }
 
 deleteNote(){
@@ -567,6 +584,7 @@ deleteNote(){
 reallyDeleteNote(){
     deleteArchEnt(note_id);
     cancelTabGroup("Notes", false);
+    showTab("Trench/Notes");
 }
 
 /*** MISC ***/

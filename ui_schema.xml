@@ -80,6 +80,7 @@
               <Attach_Sketches/>
               <View_Attached/>
               <Update/>
+              <Update_And_New/>
               <Delete/>
             </Trench_Info>
             <Slope>
@@ -123,13 +124,18 @@
               <Distubance/>
               <Artefacts/>
               <Notes/>
-              <Update/>
+              <Job_Name/>
+              <Trench_ID/>
+              <Author/>
+              <Update_And_New/>
+              <Update_And_Close/>
               <Delete/>
             </Soil>
             <Grass_Roots>
               <Root_Size/>
               <Root_Abundance/>
-              <Update/>
+              <Update_And_New/>
+              <Update_And_Close/>
               <Delete/>
             </Grass_Roots>
             <Add>
@@ -138,7 +144,8 @@
               <Sketches/>
               <Attach_Sketches/>
               <View_Attached/>
-              <Update/>
+              <Update_And_New/>
+              <Update_And_Close/>
               <Delete/>
             </Add>
           </Unit>
@@ -149,7 +156,11 @@
               <Thickness/>
               <Artefact_Density/>
               <Notes/>
-              <Update/>
+              <Job_Name/>
+              <Trench_ID/>
+              <Author/>
+              <Update_And_New/>
+              <Update_And_Close/>
               <Delete/>
             </Spit_Info>
           </Spit>
@@ -161,8 +172,6 @@
               <Job_Name/>
               <Creation_Date/>
               <Created_By/>
-              <Update/>
-              <Duplicate/>
               <New/>
               <Close/>
               <Delete/>
@@ -402,6 +411,9 @@
         <trigger ref="Update">
           <label>{Save_Trench}</label>
         </trigger>
+        <trigger ref="Update_And_New">
+          <label>{Save_And_New_Trench}</label>
+        </trigger>
         <trigger ref="Delete">
           <label>{Delete_Trench}</label>
         </trigger>
@@ -566,8 +578,20 @@
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
           <label>{Notes}</label>
         </input>
-        <trigger ref="Update">
-          <label>{Save_Unit}</label>
+        <input ref="Job_Name" faims_attribute_name="Unit Job Name" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Job_Name}</label>
+        </input>
+        <input ref="Trench_ID" faims_attribute_name="Unit Trench ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Trench_ID}</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Unit Author" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Trench_ID}</label>
+        </input>   
+        <trigger ref="Update_And_New">
+          <label>{Save_And_New_Unit}</label>
+        </trigger>
+        <trigger ref="Update_And_Close">
+          <label>{Save_And_Close_Unit}</label>
         </trigger>
         <trigger ref="Delete">
           <label>{Delete_Unit}</label>
@@ -589,8 +613,11 @@
             <value>placeholder</value>
           </item>
         </select1>
-        <trigger ref="Update">
-          <label>{Save_Unit}</label>
+        <trigger ref="Update_And_New">
+          <label>{Save_And_New_Unit}</label>
+        </trigger>
+        <trigger ref="Update_And_Close">
+          <label>{Save_And_Close_Unit}</label>
         </trigger>
         <trigger ref="Delete">
           <label>{Delete_Unit}</label>
@@ -621,8 +648,11 @@
         <trigger ref="View_Attached">
           <label>{View_Attached}</label>
         </trigger>
-        <trigger ref="Update">
-          <label>{Save_Unit}</label>
+        <trigger ref="Update_And_New">
+          <label>{Save_And_New_Unit}</label>
+        </trigger>
+        <trigger ref="Update_And_Close">
+          <label>{Save_And_Close_Unit}</label>
         </trigger>
         <trigger ref="Delete">
           <label>{Delete_Unit}</label>
@@ -648,8 +678,20 @@
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
           <label>{Notes}</label>
         </input>
-        <trigger ref="Update">
-          <label>{Save_Spit}</label>
+        <input ref="Job_Name" faims_attribute_name="Spit Job Name" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Job_Name}</label>
+        </input>
+        <input ref="Trench_ID" faims_attribute_name="Spit Trench ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Trench_ID}</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Spit Author" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>{Trench_ID}</label>
+        </input>        
+        <trigger ref="Update_And_New">
+          <label>{Save_And_New_Spit}</label>
+        </trigger>
+        <trigger ref="Update_And_Close">
+          <label>{Save_And_Close_Spit}</label>
         </trigger>
         <trigger ref="Delete">
           <label>{Delete_Spit}</label>
@@ -660,41 +702,35 @@
 
      <!-- ArchEnt: Photograph Log -->
     <group ref="Photograph_log" faims_archent_type="Photograph log">
-      <label>Photograph Log</label>
+      <label>{Photograph_Log}</label>
       <group ref="Photograph_log">
-        <label>Photograph Log</label>
+        <label>{Photograph_Log}</label>
         <input faims_attribute_name="Photograph reference ID" faims_attribute_type="freetext" faims_read_only="false" ref="Photograph_reference_ID" faims_certainty="true">
-          <label>Photograph Log ID</label>
+          <label>{Photograph_Log_ID}</label>
         </input>
         <input faims_attribute_name="Scene type" faims_attribute_type="freetext" faims_certainty="true" faims_read_only="false" ref="Scene_type">
-          <label>Description</label>
+          <label>{Description}</label>
         </input>
          <input faims_certainty="false" faims_read_only="true" ref="Trench_ID" faims_attribute_name="PL Trench ID" faims_attribute_type="freetext">
-          <label>Trench ID</label>
+          <label>{Trench_ID}</label>
         </input>
         <input faims_certainty="false" faims_read_only="true" ref="Job_Name" faims_attribute_name="PL Job Name" faims_attribute_type="freetext">
-          <label>Job Name</label>
+          <label>{Job_Name}</label>
         </input>       
         <input faims_certainty="false" faims_read_only="true" ref="Creation_Date">
-          <label>Timestamp</label>
+          <label>{Timestamp}</label>
         </input>
         <input faims_certainty="false" faims_read_only="true" ref="Created_By">
-          <label>Author</label>
+          <label>{Author}</label>
         </input>
-        <trigger ref="Update">
-        <label>Save Record</label>
-        </trigger>
-        <trigger ref="Duplicate">
-          <label>Save and Duplicate Record</label>
-        </trigger>
         <trigger ref="New">
-          <label>Save and New Record</label>
+          <label>Save and New {Photograph_Log}</label>
         </trigger>
         <trigger ref="Close">
-          <label>Save and Close Record</label>
+          <label>Save and Close {Photograph_Log}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete Record</label>
+          <label>Delete {Photograph_Log}</label>
         </trigger>
       </group>
     </group>
@@ -702,41 +738,35 @@
 
       <!-- ArchEnt: Photograph Log -->
     <group ref="Notes" faims_archent_type="Notes">
-      <label>Notes</label>
+      <label>{Notes}</label>
       <group ref="Notes">
-        <label>Notes</label>
+        <label>{Notes}</label>
         <input faims_attribute_name="Note Label" faims_attribute_type="freetext" faims_read_only="false" ref="Note_Label" faims_certainty="true">
-          <label>Note Label</label>
+          <label>{Note_Label}</label>
         </input>
         <input faims_attribute_name="Note" faims_attribute_type="freetext" faims_certainty="true" faims_read_only="false" ref="Note">
-          <label>Note</label>
+          <label>{Note}</label>
         </input>
          <input faims_certainty="false" faims_read_only="true" ref="Trench_ID" faims_attribute_name="N Trench ID" faims_attribute_type="freetext">
-          <label>Trench ID</label>
+          <label>{Trench_ID}</label>
         </input>
         <input faims_certainty="false" faims_read_only="true" ref="Job_Name" faims_attribute_name="N Job Name" faims_attribute_type="freetext">
-          <label>Job Name</label>
+          <label>{Job_Name}</label>
         </input>       
         <input faims_certainty="false" faims_read_only="true" ref="Creation_Date" faims_attribute_name="Timestamp" faims_attribute_type="freetext">
-          <label>Timestamp</label>
+          <label>{Timestamp}</label>
         </input>
         <input faims_certainty="false" faims_read_only="true" ref="Created_By" faims_attribute_name="Author" faims_attribute_type="freetext">
-          <label>Author</label>
+          <label>{Author}</label>
         </input>
-        <trigger ref="Update">
-        <label>Save Record</label>
-        </trigger>
-        <trigger ref="Duplicate">
-          <label>Save and Duplicate Record</label>
-        </trigger>
         <trigger ref="New">
-          <label>Save and New Record</label>
+          <label>Save and New {Note}</label>
         </trigger>
         <trigger ref="Close">
-          <label>Save and Close Record</label>
+          <label>Save and Close {Note}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete Record</label>
+          <label>Delete {Note}</label>
         </trigger>
       </group>
     </group>
