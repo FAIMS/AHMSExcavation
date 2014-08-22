@@ -120,7 +120,7 @@ loadTrenchFrom(archentid) {
 
 saveTrench(String callback) {
     if (isNull(getFieldValue("Trench/Trench_Info/Trench_ID"))) {
-        showWarning("Validation Error", "Cannot save Trench without identifiers");
+        showWarning("Validation Error", "Cannot save Trench without Trench ID");
         return;
     }
     
@@ -311,7 +311,7 @@ loadUnitFrom(archentid) {
 
 saveUnit(String callback) {
     if (isNull(getFieldValue("Unit/Soil/Unit_ID")) || isNull(getFieldValue("Unit/Soil/Horizon"))) {
-        showWarning("Validation Error", "Cannot save Unit without ID or Horizon");
+        showWarning("Validation Error", "Cannot save Unit without Unit ID or Horizon");
         return;
     }
     

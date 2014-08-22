@@ -94,6 +94,9 @@
         <term> {gExcavated}
           <description>Description TBD</description>
         </term>
+        <term> {zOther}
+          <description>Description TBD</description>
+        </term>
       </lookup>
     </property>
     <property name="Landform Element" type="enum">
@@ -115,6 +118,9 @@
           <description>Description TBD</description>
         </term>
         <term> {fClosed_Depression}
+          <description>Description TBD</description>
+        </term>
+        <term> {gRidgeline}
           <description>Description TBD</description>
         </term>
         <term> {zOther_annotation}
@@ -143,6 +149,9 @@
         <term> {dLower}
           <description>Description TBD</description>
         </term>
+        <term> {zOther}
+          <description>Description TBD</description>
+        </term>
       </lookup>
     </property>
     <property name="Slope Detail 2" type="enum">
@@ -161,6 +170,9 @@
           <description>Description TBD</description>
         </term>
         <term> {dMinimal}
+          <description>Description TBD</description>
+        </term>
+        <term> {zOther}
           <description>Description TBD</description>
         </term>
       </lookup>
@@ -196,6 +208,9 @@
           <description>Description TBD</description>
         </term>
         <term> {iMarine}
+          <description>Description TBD</description>
+        </term>
+        <term> {zOther}
           <description>Description TBD</description>
         </term>
       </lookup>
@@ -255,47 +270,50 @@
         <term> {0No_Observation}
           <description>Description TBD</description>
         </term>
-        <term> {aClay}
+        <term> {1Sand}
           <description>Description TBD</description>
+          <term> {1.1Loamy_Sand}
+            <description>Description TBD</description>
+          </term>
+          <term> {1.2Clayey_Sand}
+            <description>Description TBD</description>
+          </term>
+          <term> {1.3Silty_Sand}
+            <description>Description TBD</description>
+          </term>
         </term>
-        <term> {bSand}
+        <term> {2Clay}
           <description>Description TBD</description>
+          <term> {2.1Sandy_Clay}
+            <description>Description TBD</description>
+          </term>
+          <term> {2.2Silty_Clay}
+            <description>Description TBD</description>
+          </term>
         </term>
-        <term> {cLoam}
+        <term> {3Loam}
           <description>Description TBD</description>
-        </term>
-        <term> {dLoamy_sand}
-          <description>Description TBD</description>
-        </term>
-        <term> {eClayey_sand}
-          <description>Description TBD</description>
-        </term>
-        <term> {fSandy_loam}
-          <description>Description TBD</description>
-        </term>
-        <term> {gSilty_loam}
-          <description>Description TBD</description>
-        </term>
-        <term> {hSandy_clay_loam}
-          <description>Description TBD</description>
-        </term>
-        <term> {iClay_loam}
-          <description>Description TBD</description>
-        </term>
-        <term> {jClay_loam_sandy}
-          <description>Description TBD</description>
-        </term>
-        <term> {kSilty_clay_loam}
-          <description>Description TBD</description>
-        </term>
-        <term> {lSilty_clay}
-          <description>Description TBD</description>
-        </term>
-        <term> {mSandy_clay}
-          <description>Description TBD</description>
-        </term>
-        <term> {nSilty_sand}
-          <description>Description TBD</description>
+          <term> {3.1Loam}
+            <description>Description TBD</description>
+          </term>
+          <term> {3.2Sandy_Loam}
+            <description>Description TBD</description>
+          </term>
+          <term> {3.3Silty_Clay_Loam}
+            <description>Description TBD</description>
+          </term>
+          <term> {3.4Sandy_Clay_Loam}
+            <description>Description TBD</description>
+          </term>
+          <term> {3.5Clay_Loam}
+            <description>Description TBD</description>
+          </term>
+          <term> {3.6Clay_Loam_Sandy}
+            <description>Description TBD</description>
+          </term>
+          <term> {3.7Silty_Clay_Loam}
+            <description>Description TBD</description>
+          </term>
         </term>
       </lookup>
     </property>
