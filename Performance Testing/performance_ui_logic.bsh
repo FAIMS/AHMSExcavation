@@ -52,7 +52,7 @@ onEvent("Trench/Notes/ListNotes", "click", "loadNote();");
 onEvent("Trench", "show", "showSlopeTab(true)");
 
 onEvent("Trench/Trench_Info/Update", "delayclick", "saveTrench(\"\")");
-onEvent("Trench/Trench_Info/Update_And_New", "delayclick", "saveTrench(\"newTrench();showSlopeTab(true);\")");
+onEvent("Trench/Trench_Info/Update_And_New", "delayclick", "saveTrench(\"newTrench()\")");
 onEvent("Trench/Slope/Update", "delayclick", "saveTrench(\"\")");
 
 onEvent("Trench/Trench_Info/Delete", "delayclick", "deleteTrench()");
@@ -116,13 +116,11 @@ loadTrenchFrom(archentid) {
     } else {
         fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', 1);");
     }
-    print(getFieldValue("Trench/Trench_Info/Photos"));
-    print(getFieldValue("Trench/Trench_Info/Sketches"));
 }
 
 saveTrench(String callback) {
     if (isNull(getFieldValue("Trench/Trench_Info/Trench_ID"))) {
-        showWarning("Validation Error", "Cannot save Trench without identifiers");
+        showWarning("Validation Error", "Cannot save Trench without Trench ID");
         return;
     }
     
@@ -132,8 +130,7 @@ saveTrench(String callback) {
         fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', 1);");
         fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', 1);");
     }
-    saveTabGroup("Trench", trench_id, null, null, "trench_id = getLastSavedRecordId();refreshAttachments();" + callback);
-
+    saveTabGroup("Trench", trench_id, null, null, "trench_id = getLastSavedRecordId();" + callback);
 }
 
 deleteTrench() {
@@ -158,12 +155,6 @@ loadTrenchAttributes() {
     populateCheckBoxGroup("Trench/Trench_Info/Samples_Collected", makeVocab("Samples Collected"));
     populateDropDown("Trench/Slope/Slope_Detail", makeVocab("Slope Detail"));
     populateDropDown("Trench/Slope/Slope_Detail_2", makeVocab("Slope Detail 2"));
-}
-
-
-refreshAttachments() {
-    // populateCameraPictureGallery("Trench/Trench_Info/Photos", getFieldFromDatabase(trench_id, "Photos"));
-    // populateCheckBoxGroup("Trench/Trench_Info/Sketches", getFieldFromDatabase(trench_id, "Sketches"));
 }
 
 showSlopeTab(Boolean onLoad) {
@@ -277,7 +268,8 @@ loadRelatedNotes() {
 /*** ARCHENT: Unit ***/
 onEvent("Unit", "show", "showGrassRootsTab(true)");
 
-onEvent("Unit/Soil/Update_And_New", "delayclick", "saveUnit(\"newUnit();showGrassRootsTab(true);\")");
+onEvent("Unit/Soil/Update_And_New", "delayclick", "saveUnit(\"newUnit()\")");
+onEvent("Unit/Add/Update_And_New", "delayclick", "saveUnit(\"newUnit()\")");
 
 onEvent("Unit/Soil/Update_And_Close", "delayclick", "saveUnit(\"cancelTabGroup(\\\"Unit\\\",false);showTab(\\\"Trench/Units\\\");\")");
 onEvent("Unit/Add/Update_And_Close", "delayclick", "saveUnit(\"cancelTabGroup(\\\"Unit\\\",false);showTab(\\\"Trench/Units\\\");\")");
@@ -319,7 +311,7 @@ loadUnitFrom(archentid) {
 
 saveUnit(String callback) {
     if (isNull(getFieldValue("Unit/Soil/Unit_ID")) || isNull(getFieldValue("Unit/Soil/Horizon"))) {
-        showWarning("Validation Error", "Cannot save Unit without ID or Horizon");
+        showWarning("Validation Error", "Cannot save Unit without Unit ID or Horizon");
         return;
     }
     
@@ -514,7 +506,6 @@ savePhotolog(String callback) {
 
 closePhotoLog() {
     cancelTabGroup("Photograph_log", false);
-    showTab("Trench/PhotoLog");
 }
 
 deletePhotolog(){
@@ -522,14 +513,12 @@ deletePhotolog(){
         showAlert("Confirm Deletion", "Press OK to Delete this Photolog Record!", "reallyDeletePhotolog()", "doNotDelete()");
     } else {
         cancelTabGroup("Photograph_log", true);
-        showTab("Trench/PhotoLog");
     }
 }
 
 reallyDeletePhotolog(){
     deleteArchEnt(photolog_id);
     cancelTabGroup("Photograph_log", false);
-    showTab("Trench/PhotoLog");
 }
 
 /*** Note Stuff ***/
@@ -652,10 +641,6 @@ fillInGPS(String path) {
     }
 }
 
-getFieldFromDatabase(String uuid, String attributename) {
-    return fetchOne("select freetext from latestnondeletedaentvalue join attributekey using (attributeid) where uuid = " + uuid + " and attributename = '" + attributename + "';");
-}
-
 /*** Map stuff gone for now
 //Map stuff
 DATA_ENTRY_LAYER = "Data Entry Layer";
@@ -705,6 +690,9 @@ login() {
     setUser(user);
     username = userResult.get(1) + " " + userResult.get(2);
     showTabGroup("control");
+    setFieldValue("control/Performance/Number_of_Jobs", "1");
+    setFieldValue("control/Performance/Average_Number_of_Trenches", "10");
+    setFieldValue("control/Performance/Average_Number_of_Units", "10");
 }
 
 onEvent("user/usertab/users", "click", "login()");
@@ -732,3 +720,92 @@ stopSync() {
 
 loadTrenchAttributes();
 loadUnitAttributes();
+
+onEvent("control/Performance/Generate_Trenches", "delayclick", "generateTrenches()");
+onEvent("control/Performance/Generate_Units", "delayclick", "generateUnits()");
+
+generateTrenches() {
+    number_of_jobs = Integer.parseInt(getFieldValue("control/Performance/Number_of_Jobs"));
+    number_of_trenches = Integer.parseInt(getFieldValue("control/Performance/Average_Number_of_Trenches"));
+    curr_trench = 0;
+    max_trench = number_of_trenches*number_of_jobs;
+    print(max_trench);
+    generateTrench();
+}
+
+int curr_trench, max_trench, curr_unit, max_unit, number_of_jobs, number_of_trenches, number_of_units;
+generateTrench() {
+    if(curr_trench == max_trench) return;
+    setFieldValue("control/Excavation_Data/Job_Name", "Job " + ((curr_trench/number_of_trenches)+1));
+    newTrench();
+    setFieldValue("Trench/Trench_Info/Trench_ID", "" + ((curr_trench%number_of_trenches)+1));
+    curr_trench++;
+    setFieldValue("Trench/Trench_Info/Latitude", getRandomMeasure());
+    setFieldValue("Trench/Trench_Info/Longitude", getRandomMeasure());
+    setFieldValue("Trench/Trench_Info/Northing", getRandomMeasure());
+    setFieldValue("Trench/Trench_Info/Easting", getRandomMeasure());
+    setFieldValue("Trench/Trench_Info/Dimensions", getRandomVocab("Dimensions"));
+    setFieldValue("Trench/Trench_Info/Artefacts_Present", getRandomVocab("Artefacts Present"));
+    setFieldValue("Trench/Trench_Info/Landform_Genesis", getRandomVocab("Landform Genesis"));
+    setFieldValue("Trench/Trench_Info/Landform_Element", getRandomVocab("Landform Element"));
+    setFieldValue("Trench/Trench_Info/Geomorphic_Context", getRandomVocab("Geomorphic Context"));
+    setFieldValue("Trench/Trench_Info/Aspect", getRandomFreetext());
+    setFieldValue("Trench/Trench_Info/Distance_To_Water", getRandomFreetext());
+    setFieldValue("Trench/Trench_Info/Samples_Collected", getRandomVocab("Samples Collected"));
+    setFieldValue("Trench/Trench_Info/Samples_Details", getRandomFreetext());
+    setFieldValue("Trench/Slope/Slope_Degree", getRandomMeasure());
+    setFieldValue("Trench/Slope/Slope_Detail", getRandomVocab("Slope Detail"));
+    setFieldValue("Trench/Slope/Slope_Detail_2", getRandomVocab("Slope Detail 2"));
+    addFile("Trench/Trench_Info/Sketches", "/storage/sdcard0/Download/berlandv3.cpp");
+    addPicture("Trench/Trench_Info/Photos", "/storage/sdcard0/DCIM/image-1407731438776.jpg");
+    saveTrench("cancelTabGroup(\"Trench\", false);generateTrench();");
+}
+
+ArrayList trenchlist;
+generateUnits() {
+    trenchlist = fetchEntityList("Trench");
+    number_of_units = Integer.parseInt(getFieldValue("control/Performance/Average_Number_of_Units"));
+    curr_unit = 0;
+    max_unit = Integer.parseInt(getFieldValue("control/Performance/Average_Number_of_Units"))*trenchlist.size();
+    generateUnit();
+}
+
+
+generateUnit() {
+    print(curr_unit);
+    if(curr_unit == max_unit) return;
+    if(curr_unit%number_of_units == 0) {
+        loadTrenchFrom(trenchlist.get(curr_unit/number_of_units).get(0));
+        print(trenchlist.get(curr_unit/number_of_units).get(0));
+    }
+    newUnit();
+    curr_unit++;
+    setFieldValue("Unit/Soil/Horizon", getRandomFreetext());
+    setFieldValue("Unit/Soil/Depth", getRandomMeasure());
+    setFieldValue("Unit/Soil/pH", getRandomFreetext());
+    setFieldValue("Unit/Soil/Colour", getRandomFreetext());
+    setFieldValue("Unit/Soil/Texture", getRandomVocab("Texture"));
+    setFieldValue("Unit/Soil/Moisture", getRandomVocab("Moisture"));
+    setFieldValue("Unit/Soil/Grain_size", getRandomVocab("Grain size"));
+    setFieldValue("Unit/Soil/Consistency", getRandomVocab("Consistency"));
+    setFieldValue("Unit/Soil/Cementation", getRandomVocab("Cementation"));
+    setFieldValue("Unit/Soil/Inclusions", getRandomVocab("Inclusions"));
+    setFieldValue("Unit/Soil/Distubance", getRandomVocab("Distubance"));
+    setFieldValue("Unit/Soil/Artefacts", getRandomVocab("Artefacts"));
+    setFieldValue("Unit/Soil/Notes", getRandomFreetext());
+    setFieldValue("Unit/Grass_Roots/Root_Size", getRandomVocab("Root Size"));
+    setFieldValue("Unit/Grass_Roots/Root_Abundance", getRandomVocab("Root Abundance"));
+    saveUnit("cancelTabGroup(\"Unit\", false);generateUnit();");
+}
+
+String getRandomFreetext() {
+    return fetchOne("select hex(randomblob(4)) || ' ' || hex(randomblob(4)) || ' ' || hex(randomblob(4)) || ' ' || hex(randomblob(4));").get(0);
+}
+
+String getRandomVocab(String vocabname) {
+    return fetchOne("select vocabid, vocabname from vocabulary where attributeid in (select attributeid from attributekey where attributename = '" + vocabname + "' ) order by random() limit 1;").get(0);
+}
+
+String getRandomMeasure() {
+    return fetchOne("select abs(random()) % 5000;").get(0);
+}

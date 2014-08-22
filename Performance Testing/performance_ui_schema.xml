@@ -42,6 +42,13 @@
               <connectInternalGPS/>
               <connectExternalGPS/>
             </Control>
+            <Performance>
+              <Number_of_Jobs/>
+              <Average_Number_of_Trenches/>
+              <Average_Number_of_Units/>
+              <Generate_Trenches/>
+              <Generate_Units/>
+            </Performance>
           </control>
           <Trench>
             <Trench_Info>
@@ -194,18 +201,20 @@
           </Notes>
         </faims>
       </instance>
+      <bind nodeset="/faims/control/Performance/Number_of_Jobs" type="decimal"/>
+      <bind nodeset="/faims/control/Performance/Average_Number_of_Trenches" type="decimal"/>
+      <bind nodeset="/faims/control/Performance/Average_Number_of_Units" type="decimal"/>
       <bind nodeset="/faims/Trench/Trench_Info/Trench_ID" type="decimal"/>
       <bind nodeset="/faims/Trench/Trench_Info/container1/child1/Latitude" type="decimal"/>
       <bind nodeset="/faims/Trench/Trench_Info/container1/child2/Longitude" type="decimal"/>
       <bind nodeset="/faims/Trench/Trench_Info/container2/child1/Northing" type="decimal"/>
       <bind nodeset="/faims/Trench/Trench_Info/container2/child2/Easting" type="decimal"/>
-      <bind nodeset="/faims/Trench/Slope/Slope_Degree" type="decimal"/>
       <bind nodeset="/faims/Unit/Soil/Unit_ID" type="decimal"/>
-      <bind nodeset="/faims/Unit/Soil/Depth" type="decimal"/>
       <bind nodeset="/faims/Unit/Soil/Notes" type="string"/>
       <bind nodeset="/faims/Spit/Spit_Info/Spit_ID" type="decimal"/>
       <bind nodeset="/faims/Spit/Spit_Info/Artefact_Density" type="decimal"/>
       <bind nodeset="/faims/Spit/Spit_Info/Notes" type="string"/>
+      <bind nodeset="/faims/control/Performance/Number_of_Records" type="decimal"/>
     </model>
   </h:head>
   <h:body>
@@ -284,6 +293,24 @@
         </trigger>
         <trigger ref="stopsync">
           <label>{Stop_Syncing}</label>
+        </trigger>
+      </group>
+      <group ref="Performance">
+        <label>Performance</label>
+        <input ref="Number_of_Jobs" faims_certainty="false" faims_annotation="false">
+          <label>Number of Jobs to generate</label>
+        </input>
+        <input ref="Average_Number_of_Trenches" faims_certainty="false" faims_annotation="false">
+          <label>Average Number of Trenches per Job to generate</label>
+        </input>
+        <input ref="Average_Number_of_Units" faims_certainty="false" faims_annotation="false">
+          <label>Average Number of Units per Trench to generate</label>
+        </input>
+        <trigger ref="Generate_Trenches">
+          <label>Generate Trenches</label>
+        </trigger>
+        <trigger ref="Generate_Units">
+          <label>Generate Units</label>
         </trigger>
       </group>
     </group>
@@ -422,7 +449,7 @@
       </group>
       <group ref="Slope" faims_hidden="true">
         <label>{Slope}</label>
-        <input ref="Slope_Degree" faims_attribute_name="Slope Degree" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+        <input ref="Slope_Degree" faims_attribute_name="Slope Degree" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Slope_Degree}</label>
         </input>
         <select1 ref="Slope_Detail" faims_attribute_name="Slope Detail" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
@@ -518,7 +545,7 @@
         <input ref="Horizon" faims_attribute_name="Horizon" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
           <label>{Horizon}</label>
         </input>
-        <input ref="Depth" faims_attribute_name="Depth" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+        <input ref="Depth" faims_attribute_name="Depth" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Depth}</label>
         </input>
         <input ref="pH" faims_attribute_name="pH" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
@@ -677,7 +704,7 @@
         <input ref="Thickness" faims_attribute_name="Thickness" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Thickness}</label>
         </input>
-        <input ref="Artefact_Density" faims_attribute_name="Artefact Density" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+        <input ref="Artefact_Density" faims_attribute_name="Artefact Density" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Artefact_Density}</label>
         </input>
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
