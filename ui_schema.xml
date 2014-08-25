@@ -108,6 +108,10 @@
               <newNote/>
               <ListNotes/>
             </Notes>
+            <hidden>
+              <numUnits/>
+              <numSpits/>
+            </hidden>
           </Trench>
           <Unit>
             <Soil>
@@ -126,7 +130,7 @@
               <Cementation/>
               <Inclusions/>
               <Fill_Grass_Roots_Details/>
-              <Distubance/>
+              <Disturbance/>
               <Artefacts/>
               <Notes/>
               <Update_And_New/>
@@ -200,9 +204,7 @@
       <bind nodeset="/faims/Trench/Trench_Info/container1/child2/Longitude" type="decimal"/>
       <bind nodeset="/faims/Trench/Trench_Info/container2/child1/Northing" type="decimal"/>
       <bind nodeset="/faims/Trench/Trench_Info/container2/child2/Easting" type="decimal"/>
-      <bind nodeset="/faims/Trench/Slope/Slope_Degree" type="decimal"/>
       <bind nodeset="/faims/Unit/Soil/Unit_ID" type="decimal"/>
-      <bind nodeset="/faims/Unit/Soil/Depth" type="decimal"/>
       <bind nodeset="/faims/Unit/Soil/Notes" type="string"/>
       <bind nodeset="/faims/Spit/Spit_Info/Spit_ID" type="decimal"/>
       <bind nodeset="/faims/Spit/Spit_Info/Artefact_Density" type="decimal"/>
@@ -426,7 +428,7 @@
       </group>
       <group ref="Slope" faims_hidden="true">
         <label>{Slope}</label>
-        <input ref="Slope_Degree" faims_attribute_name="Slope Degree" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+        <input ref="Slope_Degree" faims_attribute_name="Slope Degree" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
           <label>{Slope_Degree}</label>
         </input>
         <select1 ref="Slope_Detail" faims_attribute_name="Slope Detail" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
@@ -522,7 +524,7 @@
         <input ref="Horizon" faims_attribute_name="Horizon" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
           <label>{Horizon}</label>
         </input>
-        <input ref="Depth" faims_attribute_name="Depth" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+        <input ref="Depth" faims_attribute_name="Depth" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
           <label>{Depth}</label>
         </input>
         <input ref="pH" faims_attribute_name="pH" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
@@ -576,8 +578,8 @@
         <trigger ref="Fill_Grass_Roots_Details">
           <label>{Fill_Grass_Roots_Details}</label>
         </trigger>
-        <select ref="Distubance" faims_attribute_name="Distubance" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
-          <label>{Distubance}</label>
+        <select ref="Disturbance" faims_attribute_name="Disturbance" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Disturbance}</label>
           <item>
             <label>placeholder</label>
             <value>placeholder</value>
@@ -681,7 +683,7 @@
         <input ref="Thickness" faims_attribute_name="Thickness" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Thickness}</label>
         </input>
-        <input ref="Artefact_Density" faims_attribute_name="Artefact Density" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+        <input ref="Artefact_Density" faims_attribute_name="Artefact Density" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
           <label>{Artefact_Density}</label>
         </input>
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">

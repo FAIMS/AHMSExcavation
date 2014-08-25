@@ -721,82 +721,146 @@ stopSync() {
 loadTrenchAttributes();
 loadUnitAttributes();
 
-onEvent("control/Performance/Generate_Trenches", "delayclick", "generateTrenches()");
-onEvent("control/Performance/Generate_Units", "delayclick", "generateUnits()");
+onEvent("control/Performance/Generate_Performance_Data", "delayclick", "generatePerformanceData()");
 
-generateTrenches() {
+generatePerformanceData() {
     number_of_jobs = Integer.parseInt(getFieldValue("control/Performance/Number_of_Jobs"));
     number_of_trenches = Integer.parseInt(getFieldValue("control/Performance/Average_Number_of_Trenches"));
-    curr_trench = 0;
-    max_trench = number_of_trenches*number_of_jobs;
-    print(max_trench);
-    generateTrench();
-}
-
-int curr_trench, max_trench, curr_unit, max_unit, number_of_jobs, number_of_trenches, number_of_units;
-generateTrench() {
-    if(curr_trench == max_trench) return;
-    setFieldValue("control/Excavation_Data/Job_Name", "Job " + ((curr_trench/number_of_trenches)+1));
-    newTrench();
-    setFieldValue("Trench/Trench_Info/Trench_ID", "" + ((curr_trench%number_of_trenches)+1));
-    curr_trench++;
-    setFieldValue("Trench/Trench_Info/Latitude", getRandomMeasure());
-    setFieldValue("Trench/Trench_Info/Longitude", getRandomMeasure());
-    setFieldValue("Trench/Trench_Info/Northing", getRandomMeasure());
-    setFieldValue("Trench/Trench_Info/Easting", getRandomMeasure());
-    setFieldValue("Trench/Trench_Info/Dimensions", getRandomVocab("Dimensions"));
-    setFieldValue("Trench/Trench_Info/Artefacts_Present", getRandomVocab("Artefacts Present"));
-    setFieldValue("Trench/Trench_Info/Landform_Genesis", getRandomVocab("Landform Genesis"));
-    setFieldValue("Trench/Trench_Info/Landform_Element", getRandomVocab("Landform Element"));
-    setFieldValue("Trench/Trench_Info/Geomorphic_Context", getRandomVocab("Geomorphic Context"));
-    setFieldValue("Trench/Trench_Info/Aspect", getRandomFreetext());
-    setFieldValue("Trench/Trench_Info/Distance_To_Water", getRandomFreetext());
-    setFieldValue("Trench/Trench_Info/Samples_Collected", getRandomVocab("Samples Collected"));
-    setFieldValue("Trench/Trench_Info/Samples_Details", getRandomFreetext());
-    setFieldValue("Trench/Slope/Slope_Degree", getRandomMeasure());
-    setFieldValue("Trench/Slope/Slope_Detail", getRandomVocab("Slope Detail"));
-    setFieldValue("Trench/Slope/Slope_Detail_2", getRandomVocab("Slope Detail 2"));
-    addFile("Trench/Trench_Info/Sketches", "/storage/sdcard0/Download/berlandv3.cpp");
-    addPicture("Trench/Trench_Info/Photos", "/storage/sdcard0/DCIM/image-1407731438776.jpg");
-    saveTrench("cancelTabGroup(\"Trench\", false);generateTrench();");
-}
-
-ArrayList trenchlist;
-generateUnits() {
-    trenchlist = fetchEntityList("Trench");
     number_of_units = Integer.parseInt(getFieldValue("control/Performance/Average_Number_of_Units"));
-    curr_unit = 0;
-    max_unit = Integer.parseInt(getFieldValue("control/Performance/Average_Number_of_Units"))*trenchlist.size();
-    generateUnit();
-}
-
-
-generateUnit() {
-    print(curr_unit);
-    if(curr_unit == max_unit) return;
-    if(curr_unit%number_of_units == 0) {
-        loadTrenchFrom(trenchlist.get(curr_unit/number_of_units).get(0));
-        print(trenchlist.get(curr_unit/number_of_units).get(0));
+    print(username);
+    for(int i = 1; i <= number_of_jobs; ++i) {
+        for(int j = 1; j <= number_of_trenches; ++j) {
+            List trench_attributes = createAttributeList();
+            // freetext, vocab, measure
+            trench_attributes.add(createEntityAttribute("Job Name", "Job " + i, null, null, null));
+            trench_attributes.add(createEntityAttribute("Trench ID", "" + j, null, null, null));
+            trench_attributes.add(createEntityAttribute("Samples Details", getRandomFreetext(), null, null, null));
+            trench_attributes.add(createEntityAttribute("Samples Collected", null, null, null, null));
+            trench_attributes.add(createEntityAttribute("Distance to Water", getRandomFreetext(), null, null, null));
+            trench_attributes.add(createEntityAttribute("Aspect", getRandomFreetext(), null, null, null));
+            trench_attributes.add(createEntityAttribute("Geomorphic Context", null, getRandomVocab("Geomorphic Context"), null, null));
+            trench_attributes.add(createEntityAttribute("Slope Detail 2", null, getRandomVocab("Slope Detail 2"), null, null));
+            trench_attributes.add(createEntityAttribute("Slope Detail", null, getRandomVocab("Slope Detail"), null, null));
+            trench_attributes.add(createEntityAttribute("Slope Degree", getRandomFreetext(), null, null, null));
+            trench_attributes.add(createEntityAttribute("Dimensions", null, getRandomVocab("Dimensions"), null, null));
+            trench_attributes.add(createEntityAttribute("Easting", null, null, getRandomMeasure(), null));
+            trench_attributes.add(createEntityAttribute("Northing", null, null, getRandomMeasure(), null));
+            trench_attributes.add(createEntityAttribute("Longitude", null, null, getRandomMeasure(), null));
+            trench_attributes.add(createEntityAttribute("Latitude", null, null, getRandomMeasure(), null));
+            trench_attributes.add(createEntityAttribute("T Author", username, null, null, null));
+            trench_attributes.add(createEntityAttribute("Artefacts Present", null, getRandomVocab("Artefacts Present"), null, null));
+            trench_attributes.add(createEntityAttribute("Landform Genesis", null, getRandomVocab("Landform Genesis"), null, null));
+            trench_attributes.add(createEntityAttribute("Landform Element", null, getRandomVocab("Landform Element"), null, null));
+            trench_attributes.add(createEntityAttribute("Sketches", "/storage/sdcard0/Download/berlandv3.cpp", null, null, null));
+            trench_attributes.add(createEntityAttribute("Photos", "/storage/sdcard0/DCIM/image-1407731438776.jpg", null, null, null));
+            trench_id = saveArchEnt(null, "Trench", null, trench_attributes);
+            for(int k = 1; k <= number_of_units; ++k) {
+                List unit_attributes = createAttributeList();
+                unit_attributes.add(createEntityAttribute("Unit Job Name", "Job " + i, null, null, null));
+                unit_attributes.add(createEntityAttribute("Unit Trench ID", "" + j, null, null, null));
+                unit_attributes.add(createEntityAttribute("Unit ID", "" + k, null, null, null));
+                unit_attributes.add(createEntityAttribute("Consistency", null, getRandomVocab("Consistency"), null, null));
+                unit_attributes.add(createEntityAttribute("Cementation", null, getRandomVocab("Cementation"), null, null));
+                unit_attributes.add(createEntityAttribute("Inclusions", null, getRandomVocab("Inclusions"), null, null));
+                unit_attributes.add(createEntityAttribute("Grain size", null, getRandomVocab("Grain size"), null, null));
+                unit_attributes.add(createEntityAttribute("Moisture", null, getRandomVocab("Moisture"), null, null));
+                unit_attributes.add(createEntityAttribute("Texture", null, getRandomVocab("Texture"), null, null));
+                unit_attributes.add(createEntityAttribute("Colour", getRandomFreetext(), null, null, null));
+                unit_attributes.add(createEntityAttribute("pH", getRandomFreetext(), null, null, null));
+                unit_attributes.add(createEntityAttribute("Depth", null, null, getRandomMeasure(), null));
+                unit_attributes.add(createEntityAttribute("Horizon", getRandomFreetext(), null, null, null));
+                unit_attributes.add(createEntityAttribute("Artefacts", null, getRandomVocab("Artefacts"), null, null));
+                unit_attributes.add(createEntityAttribute("Notes", getRandomFreetext(), null, null, null));
+                unit_attributes.add(createEntityAttribute("Unit Author", null, null, null, null));
+                unit_attributes.add(createEntityAttribute("Distubance", null, getRandomVocab("Distubance"), null, null));
+                unit_attributes.add(createEntityAttribute("Root Abundance", null, getRandomVocab("Root Abundance"), null, null));
+                unit_attributes.add(createEntityAttribute("Root Size", null, getRandomVocab("Root Size"), null, null));
+                unit_id = saveArchEnt(null, "Unit", null, unit_attributes);
+                saveEntitiesToRel("TrenchUnit", trench_id, unit_id);
+            }
+        }
     }
-    newUnit();
-    curr_unit++;
-    setFieldValue("Unit/Soil/Horizon", getRandomFreetext());
-    setFieldValue("Unit/Soil/Depth", getRandomMeasure());
-    setFieldValue("Unit/Soil/pH", getRandomFreetext());
-    setFieldValue("Unit/Soil/Colour", getRandomFreetext());
-    setFieldValue("Unit/Soil/Texture", getRandomVocab("Texture"));
-    setFieldValue("Unit/Soil/Moisture", getRandomVocab("Moisture"));
-    setFieldValue("Unit/Soil/Grain_size", getRandomVocab("Grain size"));
-    setFieldValue("Unit/Soil/Consistency", getRandomVocab("Consistency"));
-    setFieldValue("Unit/Soil/Cementation", getRandomVocab("Cementation"));
-    setFieldValue("Unit/Soil/Inclusions", getRandomVocab("Inclusions"));
-    setFieldValue("Unit/Soil/Distubance", getRandomVocab("Distubance"));
-    setFieldValue("Unit/Soil/Artefacts", getRandomVocab("Artefacts"));
-    setFieldValue("Unit/Soil/Notes", getRandomFreetext());
-    setFieldValue("Unit/Grass_Roots/Root_Size", getRandomVocab("Root Size"));
-    setFieldValue("Unit/Grass_Roots/Root_Abundance", getRandomVocab("Root Abundance"));
-    saveUnit("cancelTabGroup(\"Unit\", false);generateUnit();");
 }
+
+// onEvent("control/Performance/Generate_Trenches", "delayclick", "generateTrenches()");
+// onEvent("control/Performance/Generate_Units", "delayclick", "generateUnits()");
+
+// generateTrenches() {
+//     number_of_jobs = Integer.parseInt(getFieldValue("control/Performance/Number_of_Jobs"));
+//     number_of_trenches = Integer.parseInt(getFieldValue("control/Performance/Average_Number_of_Trenches"));
+//     curr_trench = 0;
+//     max_trench = number_of_trenches*number_of_jobs;
+//     print(max_trench);
+//     for(curr_trench = 0; curr_trench < max_trench; curr_trench++) {
+//         generateTrench();    
+//     }
+    
+// }
+
+// int curr_trench, max_trench, curr_unit, max_unit, number_of_jobs, number_of_trenches, number_of_units;
+// generateTrench() {
+//     if(curr_trench == max_trench) return;
+//     setFieldValue("control/Excavation_Data/Job_Name", "Job " + ((curr_trench/number_of_trenches)+1));
+//     newTrench();
+//     setFieldValue("Trench/Trench_Info/Trench_ID", "" + ((curr_trench%number_of_trenches)+1));
+//     curr_trench++;
+//     setFieldValue("Trench/Trench_Info/Latitude", getRandomMeasure());
+//     setFieldValue("Trench/Trench_Info/Longitude", getRandomMeasure());
+//     setFieldValue("Trench/Trench_Info/Northing", getRandomMeasure());
+//     setFieldValue("Trench/Trench_Info/Easting", getRandomMeasure());
+//     setFieldValue("Trench/Trench_Info/Dimensions", getRandomVocab("Dimensions"));
+//     setFieldValue("Trench/Trench_Info/Artefacts_Present", getRandomVocab("Artefacts Present"));
+//     setFieldValue("Trench/Trench_Info/Landform_Genesis", getRandomVocab("Landform Genesis"));
+//     setFieldValue("Trench/Trench_Info/Landform_Element", getRandomVocab("Landform Element"));
+//     setFieldValue("Trench/Trench_Info/Geomorphic_Context", getRandomVocab("Geomorphic Context"));
+//     setFieldValue("Trench/Trench_Info/Aspect", getRandomFreetext());
+//     setFieldValue("Trench/Trench_Info/Distance_To_Water", getRandomFreetext());
+//     setFieldValue("Trench/Trench_Info/Samples_Collected", getRandomVocab("Samples Collected"));
+//     setFieldValue("Trench/Trench_Info/Samples_Details", getRandomFreetext());
+//     setFieldValue("Trench/Slope/Slope_Degree", getRandomMeasure());
+//     setFieldValue("Trench/Slope/Slope_Detail", getRandomVocab("Slope Detail"));
+//     setFieldValue("Trench/Slope/Slope_Detail_2", getRandomVocab("Slope Detail 2"));
+//     addFile("Trench/Trench_Info/Sketches", "/storage/sdcard0/Download/berlandv3.cpp");
+//     addPicture("Trench/Trench_Info/Photos", "/storage/sdcard0/DCIM/image-1407731438776.jpg");
+//     saveTrench("cancelTabGroup(\"Trench\", false);");
+// }
+
+// ArrayList trenchlist;
+// generateUnits() {
+//     trenchlist = fetchEntityList("Trench");
+//     number_of_units = Integer.parseInt(getFieldValue("control/Performance/Average_Number_of_Units"));
+//     curr_unit = 0;
+//     max_unit = Integer.parseInt(getFieldValue("control/Performance/Average_Number_of_Units"))*trenchlist.size();
+//     generateUnit();
+// }
+
+
+// generateUnit() {
+//     print(curr_unit);
+//     if(curr_unit == max_unit) return;
+//     if(curr_unit%number_of_units == 0) {
+//         loadTrenchFrom(trenchlist.get(curr_unit/number_of_units).get(0));
+//         print(trenchlist.get(curr_unit/number_of_units).get(0));
+//     }
+//     newUnit();
+//     curr_unit++;
+//     setFieldValue("Unit/Soil/Horizon", getRandomFreetext());
+//     setFieldValue("Unit/Soil/Depth", getRandomMeasure());
+//     setFieldValue("Unit/Soil/pH", getRandomFreetext());
+//     setFieldValue("Unit/Soil/Colour", getRandomFreetext());
+//     setFieldValue("Unit/Soil/Texture", getRandomVocab("Texture"));
+//     setFieldValue("Unit/Soil/Moisture", getRandomVocab("Moisture"));
+//     setFieldValue("Unit/Soil/Grain_size", getRandomVocab("Grain size"));
+//     setFieldValue("Unit/Soil/Consistency", getRandomVocab("Consistency"));
+//     setFieldValue("Unit/Soil/Cementation", getRandomVocab("Cementation"));
+//     setFieldValue("Unit/Soil/Inclusions", getRandomVocab("Inclusions"));
+//     setFieldValue("Unit/Soil/Distubance", getRandomVocab("Distubance"));
+//     setFieldValue("Unit/Soil/Artefacts", getRandomVocab("Artefacts"));
+//     setFieldValue("Unit/Soil/Notes", getRandomFreetext());
+//     setFieldValue("Unit/Grass_Roots/Root_Size", getRandomVocab("Root Size"));
+//     setFieldValue("Unit/Grass_Roots/Root_Abundance", getRandomVocab("Root Abundance"));
+//     saveUnit("cancelTabGroup(\"Unit\", false); generateUnit();");
+// }
 
 String getRandomFreetext() {
     return fetchOne("select hex(randomblob(4)) || ' ' || hex(randomblob(4)) || ' ' || hex(randomblob(4)) || ' ' || hex(randomblob(4));").get(0);

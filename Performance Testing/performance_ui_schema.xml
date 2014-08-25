@@ -46,8 +46,9 @@
               <Number_of_Jobs/>
               <Average_Number_of_Trenches/>
               <Average_Number_of_Units/>
-              <Generate_Trenches/>
-              <Generate_Units/>
+              <Generate_Performance_Data/>
+              <!-- <Generate_Trenches/> -->
+              <!-- <Generate_Units/> -->
             </Performance>
           </control>
           <Trench>
@@ -306,12 +307,15 @@
         <input ref="Average_Number_of_Units" faims_certainty="false" faims_annotation="false">
           <label>Average Number of Units per Trench to generate</label>
         </input>
-        <trigger ref="Generate_Trenches">
+        <trigger ref="Generate_Performance_Data">
+          <label>Generate Performance Data</label>
+        </trigger>
+        <!-- <trigger ref="Generate_Trenches">
           <label>Generate Trenches</label>
         </trigger>
         <trigger ref="Generate_Units">
           <label>Generate Units</label>
-        </trigger>
+        </trigger> -->
       </group>
     </group>
     <group ref="Trench" faims_archent_type="Trench">
