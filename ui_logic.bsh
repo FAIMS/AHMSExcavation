@@ -11,7 +11,7 @@ makeLocalID(){
 makeLocalID();
 onEvent("control", "show", "setIDNull()");
 onEvent("control/Excavation_Data", "show", "refreshTrenchList()");
-onEvent("control/Excavation_Data/newTrench", "click","newTrench()");
+onEvent("control/Excavation_Data/newTrench", "click","newTrench(false)");
 onEvent("control/Excavation_Data/TrenchList", "click", "loadTrench()");
 
 onEvent("control/Units", "show", "refreshUnitList()");
@@ -33,7 +33,6 @@ refreshUnitList(){
         "(select uuid as childuuid, response from identifierasspreadsheet join latestnondeletedarchent using (uuid) join aenttype using (aenttypeid) where aenttypename = 'Unit') unit on (child.uuid = childuuid); "));
 }
 
-
 setIDNull() {
     trench_id = null;
     unit_id = null;
@@ -52,7 +51,7 @@ onEvent("Trench/Notes/ListNotes", "click", "loadNote();");
 onEvent("Trench", "show", "showSlopeTab(true)");
 
 onEvent("Trench/Trench_Info/Update", "delayclick", "saveTrench(\"\")");
-onEvent("Trench/Trench_Info/Update_And_New", "delayclick", "saveTrench(\"newTrench();showSlopeTab(true);\")");
+onEvent("Trench/Trench_Info/Update_And_New", "delayclick", "saveTrench(\"newTrench(true);showSlopeTab(true);\")");
 onEvent("Trench/Slope/Update", "delayclick", "saveTrench(\"\")");
 
 onEvent("Trench/Trench_Info/Delete", "delayclick", "deleteTrench()");
@@ -75,14 +74,21 @@ onEvent("Trench/Spits/Spit_List", "click", "loadSpit()");
 
 String trench_id = null;
 
-newTrench() {
-    if(isNull(getFieldValue("control/Excavation_Data/Job_Name"))) {
-        showWarning("Validation Error", "You must fill in the Job Name before you can create a Trench");
-        return;
+newTrench(Boolean onSaveAndNew) {
+    String job_name;
+    if(!onSaveAndNew) {
+        if(isNull(getFieldValue("control/Excavation_Data/Job_Name"))) {
+            showWarning("Validation Error", "You must fill in the Job Name before you can create a Trench");
+            return;
+        } else {
+            job_name = getFieldValue("control/Excavation_Data/Job_Name");
+        }
+    } else {
+        job_name = getFieldValue("Trench/Trench_Info/Job_Name");
     }
     trench_id = null;
     newTabGroup("Trench");
-    setFieldValue("Trench/Trench_Info/Job_Name", getFieldValue("control/Excavation_Data/Job_Name"));
+    setFieldValue("Trench/Trench_Info/Job_Name", job_name);
     setFieldValue("Trench/Trench_Info/Author", username);
 }
 
@@ -116,8 +122,6 @@ loadTrenchFrom(archentid) {
     } else {
         fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', 1);");
     }
-    print(getFieldValue("Trench/Trench_Info/Photos"));
-    print(getFieldValue("Trench/Trench_Info/Sketches"));
 }
 
 saveTrench(String callback) {
@@ -133,7 +137,6 @@ saveTrench(String callback) {
         fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', 1);");
     }
     saveTabGroup("Trench", trench_id, null, null, "trench_id = getLastSavedRecordId();refreshAttachments();" + callback);
-
 }
 
 deleteTrench() {
@@ -160,12 +163,6 @@ loadTrenchAttributes() {
     populateDropDown("Trench/Slope/Slope_Detail_2", makeVocab("Slope Detail 2"));
 }
 
-
-refreshAttachments() {
-    // populateCameraPictureGallery("Trench/Trench_Info/Photos", getFieldFromDatabase(trench_id, "Photos"));
-    // populateCheckBoxGroup("Trench/Trench_Info/Sketches", getFieldFromDatabase(trench_id, "Sketches"));
-}
-
 showSlopeTab(Boolean onLoad) {
     for(vocabid : getFieldValue("Trench/Trench_Info/Landform_Element")) {
         if(getVocabName(vocabid.getName()).equals("{bSlope}")) {
@@ -178,8 +175,18 @@ showSlopeTab(Boolean onLoad) {
     } else {
         showTab("Trench/Slope");
         cancelTab("Trench/Slope", false);
+        showTab("Trench/Trench_Info");
     }
     return;
+}
+
+refreshAttachments() {
+    pictures = _convertPairsToList(getFieldValue("Trench/Trench_Info/Photos"));
+    populateCameraPictureGallery("Trench/Trench_Info/Photos", pictures);
+    setFieldValue("Trench/Trench_Info/Photos", _convertListToPairs(pictures));
+    sketches = _convertPairsToList(getFieldValue("Trench/Trench_Info/Sketches"));
+    populateCheckBoxGroup("Trench/Trench_Info/Sketches", sketches);
+    setFieldValue("Trench/Trench_Info/Sketches", _convertListToPairs(sketches));
 }
 
 refreshRelatedUnits() {
@@ -280,7 +287,6 @@ onEvent("Unit", "show", "showGrassRootsTab(true)");
 onEvent("Unit/Soil/Update_And_New", "delayclick", "saveUnit(\"newUnit();showGrassRootsTab(true);\")");
 
 onEvent("Unit/Soil/Update_And_Close", "delayclick", "saveUnit(\"cancelTabGroup(\\\"Unit\\\",false);showTab(\\\"Trench/Units\\\");\")");
-onEvent("Unit/Add/Update_And_Close", "delayclick", "saveUnit(\"cancelTabGroup(\\\"Unit\\\",false);showTab(\\\"Trench/Units\\\");\")");
 
 onEvent("Unit/Soil/Delete", "delayclick", "deleteUnit()");
 onEvent("Unit/Add/Delete", "delayclick", "deleteUnit()");
@@ -385,6 +391,7 @@ showGrassRootsTab(Boolean onLoad) {
     } else {
         showTab("Unit/Grass_Roots");
         cancelTab("Unit/Grass_Roots", false);
+        showTab("Unit/Soil");
     }
     return;
 }
@@ -443,14 +450,14 @@ deleteSpit() {
         showAlert("Confirm Deletion", "Press OK to Delete this Spit!", "reallyDeleteSpit()", "doNotDelete()");
     } else {
         cancelTabGroup("Spit", true);
-        showTab("Trench/Spit");   
+        showTab("Trench/Spits");   
     }
 }
 
 reallyDeleteSpit() {
     deleteArchEnt(spit_id);
     cancelTabGroup("Spit", false);
-    showTab("Trench/Spit");
+    showTab("Trench/Spits");
 }
 
 autoNumSpit() {
@@ -498,7 +505,7 @@ loadPhotologFrom(archent_id) {
 
 savePhotolog(String callback) {
     if (isNull(getFieldValue("Photograph_log/Photograph_log/Photograph_reference_ID"))) {
-        showWarning("Validation Error", "Cannot save Photo log without Photograph Reference ID");
+        showWarning("Validation Error", "Cannot save Photo log without Photograph Log ID");
         return;
     }
     if (!isNull(photolog_id)) {
@@ -590,6 +597,7 @@ deleteNote(){
         showAlert("Confirm Deletion", "Press OK to Delete this Note Record!", "reallyDeleteNote()", "doNotDelete()");
     } else {
         cancelTabGroup("Notes", true);
+        showTab("Trench/Notes");
     }
 }
 
@@ -652,10 +660,6 @@ fillInGPS(String path) {
     }
 }
 
-getFieldFromDatabase(String uuid, String attributename) {
-    return fetchOne("select freetext from latestnondeletedaentvalue join attributekey using (attributeid) where uuid = " + uuid + " and attributename = '" + attributename + "';");
-}
-
 /*** Map stuff gone for now
 //Map stuff
 DATA_ENTRY_LAYER = "Data Entry Layer";
@@ -674,13 +678,11 @@ initMap();
 
 //Checking they have the correct projection EPSG:28355: GDA94 / MGA zone 55
 
-// checkProjection(){
-//     if(!getModuleSrid().equals("28355")){
-//         showWarning("Warning","It appears that you are using the wrong module projection. To correct this, do the following:\n1. Open the web app.\n2. Open this module.\n3. Click edit module.\n4. Change the value in the \"Module SRID:\" to 28355: GDA94 / MGA zone 55.");
-//     }
-// }
+checkProjection(){
+     showWarning("Projection Alert","You are using projection EPSG " + getModuleSrid() + ". To change the projection, do the following:\n1. Log into the FAIMS Web Server.\n2. Open this module.\n3. Click edit module.\n4. Change the value in the \"Module SRID:\" to a projection of your choice.");
+}
 
-// checkProjection();
+checkProjection();
 
 /*** USER ***/
 
@@ -711,10 +713,27 @@ onEvent("user/usertab/users", "click", "login()");
 
 /*** SYNC ***/
 
+String intExt;
+int clicks = 0;
+
+updateTrackStatus(){
+    String gpsStatus = "";
+    if(!isNull(intExt)){
+        gpsStatus += "Currently connected to " + intExt + " GPS.";
+        gpsStatus += "\nCurrent GPS Estimated Accuracy: "+ getGPSEstimatedAccuracy();
+    } else {
+        gpsStatus += "GPS not initialized.";
+    }
+
+    setFieldValue("control/Control/GPSStatus", gpsStatus);
+}
+
 onEvent("control/Control/startsync", "click", "startSync()");
 onEvent("control/Control/stopsync", "click", "stopSync()");
-onEvent("control/Control/connectExternalGPS", "click", "startExternalGPS()");
-onEvent("control/Control/connectInternalGPS", "click", "startInternalGPS()");
+onEvent("control/Control/connectExternalGPS", "click", "startExternalGPS(); if(clicks < 1) intExt = \"External\"; clicks++; updateTrackStatus();");
+onEvent("control/Control/connectInternalGPS", "click", "startInternalGPS(); if(clicks < 1) intExt = \"Internal\"; clicks++; updateTrackStatus();");
+
+onEvent("control/Control", "show", "updateTrackStatus()");
 
 setSyncMinInterval(10.0f);
 setSyncMaxInterval(20.0f);

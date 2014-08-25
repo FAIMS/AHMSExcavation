@@ -41,6 +41,7 @@
               <stopsync/>
               <connectInternalGPS/>
               <connectExternalGPS/>
+              <GPSStatus/>
             </Control>
           </control>
           <Trench>
@@ -285,6 +286,9 @@
         <trigger ref="stopsync">
           <label>{Stop_Syncing}</label>
         </trigger>
+        <input ref="GPSStatus" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+          <label>GPS Status</label>
+        </input>
       </group>
     </group>
     <group ref="Trench" faims_archent_type="Trench">
