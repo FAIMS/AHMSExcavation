@@ -108,10 +108,6 @@
               <newNote/>
               <ListNotes/>
             </Notes>
-            <hidden>
-              <numUnits/>
-              <numSpits/>
-            </hidden>
           </Trench>
           <Unit>
             <Soil>

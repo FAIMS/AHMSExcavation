@@ -354,7 +354,7 @@ loadUnitAttributes() {
     populateDropDown("Unit/Soil/Consistency", makeVocab("Consistency"));
     populateDropDown("Unit/Soil/Cementation", makeVocab("Cementation"));
     populateCheckBoxGroup("Unit/Soil/Inclusions", makeVocab("Inclusions"));
-    populateCheckBoxGroup("Unit/Soil/Distubance", makeVocab("Distubance"));
+    populateCheckBoxGroup("Unit/Soil/Disturbance", makeVocab("Disturbance"));
     populateRadioGroup("Unit/Soil/Artefacts", makeVocab("Artefacts"));
     populateDropDown("Unit/Grass_Roots/Root_Size", makeVocab("Root Size"));
     populateDropDown("Unit/Grass_Roots/Root_Abundance", makeVocab("Root Abundance"));
@@ -751,8 +751,8 @@ generatePerformanceData() {
             trench_attributes.add(createEntityAttribute("Artefacts Present", null, getRandomVocab("Artefacts Present"), null, null));
             trench_attributes.add(createEntityAttribute("Landform Genesis", null, getRandomVocab("Landform Genesis"), null, null));
             trench_attributes.add(createEntityAttribute("Landform Element", null, getRandomVocab("Landform Element"), null, null));
-            trench_attributes.add(createEntityAttribute("Sketches", "/storage/sdcard0/Download/berlandv3.cpp", null, null, null));
-            trench_attributes.add(createEntityAttribute("Photos", "/storage/sdcard0/DCIM/image-1407731438776.jpg", null, null, null));
+            trench_attributes.add(createEntityAttribute("Sketches", stripAttachedFilePath(attachFile("storage/sdcard0/Download/berlandv3.cpp", true)), null, null, null));
+            trench_attributes.add(createEntityAttribute("Photos", stripAttachedFilePath(attachFile("/storage/sdcard0/DCIM/image-1407731438776.jpg", true)), null, null, null));
             trench_id = saveArchEnt(null, "Trench", null, trench_attributes);
             for(int k = 1; k <= number_of_units; ++k) {
                 List unit_attributes = createAttributeList();
@@ -771,8 +771,8 @@ generatePerformanceData() {
                 unit_attributes.add(createEntityAttribute("Horizon", getRandomFreetext(), null, null, null));
                 unit_attributes.add(createEntityAttribute("Artefacts", null, getRandomVocab("Artefacts"), null, null));
                 unit_attributes.add(createEntityAttribute("Notes", getRandomFreetext(), null, null, null));
-                unit_attributes.add(createEntityAttribute("Unit Author", null, null, null, null));
-                unit_attributes.add(createEntityAttribute("Distubance", null, getRandomVocab("Distubance"), null, null));
+                unit_attributes.add(createEntityAttribute("Unit Author", username, null, null, null));
+                unit_attributes.add(createEntityAttribute("Disturbance", null, getRandomVocab("Disturbance"), null, null));
                 unit_attributes.add(createEntityAttribute("Root Abundance", null, getRandomVocab("Root Abundance"), null, null));
                 unit_attributes.add(createEntityAttribute("Root Size", null, getRandomVocab("Root Size"), null, null));
                 unit_id = saveArchEnt(null, "Unit", null, unit_attributes);
@@ -854,7 +854,7 @@ generatePerformanceData() {
 //     setFieldValue("Unit/Soil/Consistency", getRandomVocab("Consistency"));
 //     setFieldValue("Unit/Soil/Cementation", getRandomVocab("Cementation"));
 //     setFieldValue("Unit/Soil/Inclusions", getRandomVocab("Inclusions"));
-//     setFieldValue("Unit/Soil/Distubance", getRandomVocab("Distubance"));
+//     setFieldValue("Unit/Soil/Disturbance", getRandomVocab("Disturbance"));
 //     setFieldValue("Unit/Soil/Artefacts", getRandomVocab("Artefacts"));
 //     setFieldValue("Unit/Soil/Notes", getRandomFreetext());
 //     setFieldValue("Unit/Grass_Roots/Root_Size", getRandomVocab("Root Size"));

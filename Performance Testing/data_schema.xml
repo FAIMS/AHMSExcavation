@@ -457,7 +457,7 @@
         </term>
       </lookup>
     </property>
-    <property name="Distubance" type="enum">
+    <property name="Disturbance" type="enum">
       <description>Description TBD</description>
       <lookup>
         <term> {aPloughing}

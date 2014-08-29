@@ -133,7 +133,7 @@
               <Cementation/>
               <Inclusions/>
               <Fill_Grass_Roots_Details/>
-              <Distubance/>
+              <Disturbance/>
               <Artefacts/>
               <Notes/>
               <Update_And_New/>
@@ -603,8 +603,8 @@
         <trigger ref="Fill_Grass_Roots_Details">
           <label>{Fill_Grass_Roots_Details}</label>
         </trigger>
-        <select ref="Distubance" faims_attribute_name="Distubance" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
-          <label>{Distubance}</label>
+        <select ref="Disturbance" faims_attribute_name="Disturbance" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+          <label>{Disturbance}</label>
           <item>
             <label>placeholder</label>
             <value>placeholder</value>

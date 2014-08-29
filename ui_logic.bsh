@@ -98,34 +98,12 @@ loadTrench() {
 }
 
 loadTrenchFrom(archentid) {
-    Object startDate = new Date().getTime();
-
     trench_id = archentid;
     if (isNull(trench_id)) {
         showToast("No Trench selected");
         return;
     }
     showTabGroup("Trench", trench_id);
-    Object max_unit_id = fetchOne("select max(cast(freetext as integer))+1 from latestnondeletedaentvalue join attributekey using (attributeid) where attributename = 'Unit ID' and uuid in ( " + 
-    "select child.uuid from latestnondeletedaentreln parent join latestnondeletedaentreln child using (relationshipid) " +
-    "where parent.uuid != child.uuid " +
-    "and parent.uuid = " + trench_id + ");").get(0);
-    if(!isNull(max_unit_id)) {
-        fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', "+ max_unit_id +");");
-    } else {
-        fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', 1);");
-    }
-    Object max_spit_id = fetchOne("select max(cast(freetext as integer))+1 from latestnondeletedaentvalue join attributekey using (attributeid) where attributename = 'Spit ID' and uuid in ( " + 
-    "select child.uuid from latestnondeletedaentreln parent join latestnondeletedaentreln child using (relationshipid) " +
-    "where parent.uuid != child.uuid " +
-    "and parent.uuid = " + trench_id + ");").get(0);
-    if(!isNull(max_spit_id)) {
-        fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', "+ max_spit_id +");");
-    } else {
-        fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', 1);");
-    }
-
-    print("Function " + this + " took " + (new Date().getTime() -  startDate)+" seconds.");
 }
 
 saveTrench(String callback) {
@@ -136,11 +114,18 @@ saveTrench(String callback) {
     
     if (!isNull(trench_id)) {
         entity = fetchArchEnt(trench_id);
+        saveTabGroup("Trench", trench_id, null, null, "trench_id = getLastSavedRecordId();refreshAttachments();" + callback);
+
     } else {
-        fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', 1);");
-        fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', 1);");
+        saveTabGroup("Trench", trench_id, null, null, "trench_id = getLastSavedRecordId();refreshAttachments(); setCounters();" + callback);
+
     }
-    saveTabGroup("Trench", trench_id, null, null, "trench_id = getLastSavedRecordId();refreshAttachments();" + callback);
+}
+
+setCounters(){
+    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit"+ trench_id +"', 1);");
+    print("counters set");
+    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit"+ trench_id +"', 1);"); 
 }
 
 deleteTrench() {
@@ -179,7 +164,6 @@ showSlopeTab(Boolean onLoad) {
     } else {
         showTab("Trench/Slope");
         cancelTab("Trench/Slope", false);
-        showTab("Trench/Trench_Info");
     }
     return;
 }
@@ -305,6 +289,11 @@ onEvent("Unit/Add/View_Attached", "click", "viewArchEntAttachedFiles(unit_id)");
 String unit_id = null;
 
 newUnit() {
+    if(isNull(trench_id)) {
+        showToast("You cannot create new Unit from control menu.");
+        goBack();
+        return;
+    }
     unit_id = null;
     newTabGroup("Unit");
     autoNumUnit();
@@ -336,11 +325,11 @@ saveUnit(String callback) {
     if (!isNull(unit_id)) {
         entity = fetchArchEnt(unit_id);
     } else {
-        next_unit_id = fetchOne("select value from localSettings where key = 'Unit';").get(0);
+        next_unit_id = fetchOne("select value from localSettings where key = 'Unit"+ trench_id +"';").get(0);
         if(Integer.parseInt(getFieldValue("Unit/Soil/Unit_ID")) >= Integer.parseInt(next_unit_id)) {
-            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', "+ getFieldValue("Unit/Soil/Unit_ID") +"+1);");
+            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit"+ trench_id +"', "+ getFieldValue("Unit/Soil/Unit_ID") +"+1);");
         } else {
-            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit', "+ next_unit_id +");");    
+            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit"+ trench_id +"', "+ next_unit_id +");");    
         }
     }
     saveTabGroup("Unit", unit_id, null, null, "unit_id = getLastSavedRecordId(); saveEntitiesToRel(\"TrenchUnit\", trench_id, unit_id);" + callback);
@@ -383,7 +372,7 @@ loadUnitAttributes() {
 }
 
 autoNumUnit() {
-    next_unit_id = fetchOne("select value from localSettings where key = 'Unit';").get(0);
+    next_unit_id = fetchOne("select value from localSettings where key = 'Unit"+ trench_id +"';").get(0);
     setFieldValue("Unit/Soil/Unit_ID", next_unit_id); 
 }
 
@@ -399,7 +388,6 @@ showGrassRootsTab(Boolean onLoad) {
     } else {
         showTab("Unit/Grass_Roots");
         cancelTab("Unit/Grass_Roots", false);
-        showTab("Unit/Soil");
     }
     return;
 }
@@ -443,11 +431,11 @@ saveSpit(String callback) {
     if (!isNull(spit_id)) {
         entity = fetchArchEnt(spit_id);
     } else {
-        next_spit_id = fetchOne("select value from localSettings where key = 'Spit';").get(0);
+        next_spit_id = fetchOne("select value from localSettings where key = 'Spit"+ trench_id +"';").get(0);
         if(Integer.parseInt(getFieldValue("Spit/Spit_Info/Spit_ID")) >= Integer.parseInt(next_spit_id)) {
-            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', "+ getFieldValue("Spit/Spit_Info/Spit_ID") +"+1);");
+            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit"+ trench_id +"', "+ getFieldValue("Spit/Spit_Info/Spit_ID") +"+1);");
         } else {
-            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit', "+ next_spit_id +");");
+            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit"+ trench_id +"', "+ next_spit_id +");");
         }
     }
     saveTabGroup("Spit", spit_id, null, null, "spit_id = getLastSavedRecordId(); saveEntitiesToRel(\"TrenchSpit\", trench_id, spit_id);" + callback);
@@ -469,7 +457,7 @@ reallyDeleteSpit() {
 }
 
 autoNumSpit() {
-    next_spit_id = fetchOne("select value from localSettings where key = 'Spit';").get(0);
+    next_spit_id = fetchOne("select value from localSettings where key = 'Spit"+ trench_id +"';").get(0);
     setFieldValue("Spit/Spit_Info/Spit_ID", next_spit_id); 
 }
 
@@ -488,8 +476,6 @@ newPhotolog(){
     setFieldValue("Photograph_log/Photograph_log/Created_By", username);
     setFieldValue("Photograph_log/Photograph_log/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
     setFieldValue("Photograph_log/Photograph_log/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
-
-    //setFieldValue("Photograph_log/Photograph_log/Photograph_reference_ID", getCounter("Photograph log"));
 }
 
 loadPhotolog() {
@@ -505,10 +491,9 @@ loadPhotologFrom(archent_id) {
     }
     
     showTabGroup("Photograph_log", photolog_id);
-    Object foo = fetchOne("select fname || ' ' || lname from user join archentity using (userid) where uuid = '"+photolog_id+"' group by uuid having min(aenttimestamp)");
-    setFieldValue("Photograph_log/Photograph_log/Created_By", foo.get(0));
-    Object bar = fetchOne("select uuid, datetime(aentTimestamp, 'localtime')  from archentity where uuid = '"+photolog_id+"' group by uuid having min(aenttimestamp);");
-    setFieldValue("Photograph_log/Photograph_log/Creation_Date", bar.get(1));
+    Object created = fetchOne("select datetime(aenttimestamp, 'localtime'), fname || ' ' || lname from archentity join user using (userid) where uuid = "+photolog_id+" group by uuid having min(aenttimestamp)");
+    setFieldValue("Photograph_log/Photograph_log/Created_By", created.get(1));
+    setFieldValue("Photograph_log/Photograph_log/Creation_Date", created.get(0));
 }
 
 savePhotolog(String callback) {
@@ -577,6 +562,9 @@ loadNoteFrom(archent_id) {
     }
     
     showTabGroup("Notes", note_id);
+    Object created = fetchOne("select datetime(aenttimestamp, 'localtime'), fname || ' ' || lname from archentity join user using (userid) where uuid = "+note_id+" group by uuid having min(aenttimestamp)");
+    setFieldValue("Notes/Notes/Created_By", created.get(1));
+    setFieldValue("Notes/Notes/Creation_Date", created.get(0));
 }
 
 saveNote(String callback) {
@@ -667,22 +655,6 @@ fillInGPS(String path) {
         showToast("GPS Not initialized");
     }
 }
-
-/*** Map stuff gone for now
-//Map stuff
-DATA_ENTRY_LAYER = "Data Entry Layer";
-DATA_ENTRY_LAYER_ID = 0;
-
-onEvent("Trench/Map/centre", "click", "centerOnCurrentPosition(\"control/Map/map\");"); 
-
-initMap() {
-    setMapZoom("Trench/Map/map", 15.0f);
-    DATA_ENTRY_LAYER_ID = createCanvasLayer("Trench/Map/map", DATA_ENTRY_LAYER);
-    //showBaseMap("control/Map/map", "Base Layer", "files/data/maps/BM1.tif");
-}
-
-initMap();
-***/
 
 //Checking they have the correct projection EPSG:28355: GDA94 / MGA zone 55
 
