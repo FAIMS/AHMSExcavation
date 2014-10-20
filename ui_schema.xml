@@ -41,6 +41,7 @@
               <stopsync/>
               <connectInternalGPS/>
               <connectExternalGPS/>
+              <stopGPS/>
               <GPSStatus/>
             </Control>
           </control>
@@ -271,12 +272,15 @@
         </select1>
       </group>
       <group ref="Control">
-        <label>Control</label>
+        <label>{Control}</label>
         <trigger ref="connectExternalGPS">
-          <label>{connectExtGPS}</label>
+          <label>{ConnectExtGPS}</label>
         </trigger>
         <trigger ref="connectInternalGPS">
-          <label>{connectIntGPS}</label>
+          <label>{ConnectIntGPS}</label>
+        </trigger>
+        <trigger ref="stopGPS">
+          <label>{StopGPS}</label>
         </trigger>
         <trigger ref="startsync">
           <label>{Start_Syncing}</label>
@@ -285,7 +289,7 @@
           <label>{Stop_Syncing}</label>
         </trigger>
         <input ref="GPSStatus" faims_certainty="false" faims_annotation="false" faims_read_only="true">
-          <label>GPS Status</label>
+          <label>{GPS_Status}</label>
         </input>
       </group>
     </group>
@@ -293,13 +297,13 @@
       <label>{Trench}</label>
       <group ref="Trench_Info">
         <label>{Trench_Info}</label>
-        <input ref="Job_Name" faims_attribute_name="Job Name" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+        <input ref="Job_Name" faims_attribute_name="Job Name" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Job_Name}</label>
         </input>
-        <input ref="Author" faims_attribute_name="T Author" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+        <input ref="Author" faims_attribute_name="T Author" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Author}</label>
         </input>
-        <input ref="Trench_ID" faims_attribute_name="Trench ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+        <input ref="Trench_ID" faims_attribute_name="Trench ID" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="false" faims_style_class="required">
           <label>{Trench_ID}</label>
         </input>
         <group ref="container1" faims_style="orientation">
@@ -373,10 +377,10 @@
             <value>placeholder</value>
           </item>
         </select1>
-        <input ref="Aspect" faims_attribute_name="Aspect" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+        <input ref="Aspect" faims_attribute_name="Aspect" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Aspect}</label>
         </input>
-        <input ref="Distance_To_Water" faims_attribute_name="Distance to Water" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+        <input ref="Distance_To_Water" faims_attribute_name="Distance to Water" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Distance_To_Water}</label>
         </input>
         <select ref="Samples_Collected" faims_attribute_name="Samples Collected" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
@@ -386,10 +390,10 @@
             <value>placeholder</value>
           </item>
         </select>
-        <input ref="Samples_Details" faims_attribute_name="Samples Details" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+        <input ref="Samples_Details" faims_attribute_name="Samples Details" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Samples_Details}</label>
         </input>
-        <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+        <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Photos}</label>
           <item>
             <label>placeholder</label>
@@ -399,10 +403,10 @@
         <trigger ref="Take_Photo">
           <label>{Take_Photo}</label>
         </trigger>
-        <select type="file" ref="Sketches" faims_attribute_name="Sketches" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+        <select type="file" ref="Sketches" faims_attribute_name="Sketches" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Sketches}</label>
           <item>
-            <label>{placeholder}</label>
+            <label>placeholder</label>
             <value>placeholder</value>
           </item>
         </select>
@@ -411,9 +415,6 @@
         </trigger>
         <trigger ref="View_Attached">
           <label>{View_Attached}</label>
-        </trigger>
-        <trigger ref="Update">
-          <label>{Save_Trench}</label>
         </trigger>
         <trigger ref="Update_And_New">
           <label>{Save_And_New_Trench}</label>
@@ -424,7 +425,7 @@
       </group>
       <group ref="Slope" faims_hidden="true">
         <label>{Slope}</label>
-        <input ref="Slope_Degree" faims_attribute_name="Slope Degree" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+        <input ref="Slope_Degree" faims_attribute_name="Slope Degree" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Slope_Degree}</label>
         </input>
         <select1 ref="Slope_Detail" faims_attribute_name="Slope Detail" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
@@ -441,12 +442,6 @@
             <value>placeholder</value>
           </item>
         </select1>
-        <trigger ref="Update">
-          <label>{Save_Trench}</label>
-        </trigger>
-        <trigger ref="Delete">
-          <label>{Delete_Trench}</label>
-        </trigger>
       </group>
       <group ref="Units" faims_scrollable="false">
         <label>{Units}</label>
@@ -505,28 +500,28 @@
       <label>{Unit}</label>
       <group ref="Soil">
         <label>{Soil}</label>
-        <input ref="Job_Name" faims_attribute_name="Unit Job Name" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+        <input ref="Job_Name" faims_attribute_name="Unit Job Name" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Job_Name}</label>
         </input>
-        <input ref="Trench_ID" faims_attribute_name="Unit Trench ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+        <input ref="Trench_ID" faims_attribute_name="Unit Trench ID" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Trench_ID}</label>
         </input>
-        <input ref="Author" faims_attribute_name="Unit Author" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+        <input ref="Author" faims_attribute_name="Unit Author" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Author}</label>
         </input> 
-        <input ref="Unit_ID" faims_attribute_name="Unit ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+        <input ref="Unit_ID" faims_attribute_name="Unit ID" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="false" faims_style_class="required">
           <label>{Unit_ID}</label>
         </input>
-        <input ref="Horizon" faims_attribute_name="Horizon" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+        <input ref="Horizon" faims_attribute_name="Horizon" faims_attribute_type="measure" faims_certainty="false" faims_annotation="true" faims_read_only="false">
           <label>{Horizon}</label>
         </input>
-        <input ref="Depth" faims_attribute_name="Depth" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+        <input ref="Depth" faims_attribute_name="Depth" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Depth}</label>
         </input>
-        <input ref="pH" faims_attribute_name="pH" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+        <input ref="pH" faims_attribute_name="pH" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{pH}</label>
         </input>
-        <input ref="Colour" faims_attribute_name="Colour" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+        <input ref="Colour" faims_attribute_name="Colour" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Colour}</label>
         </input>
         <select1 ref="Texture" faims_attribute_name="Texture" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
@@ -588,7 +583,7 @@
             <value>placeholder</value>
           </item>
         </select1>
-        <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+        <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Notes}</label>
         </input>  
         <trigger ref="Update_And_New">
@@ -623,7 +618,7 @@
       </group>
       <group ref="Add" faims_hidden="true">
         <label>{Add}</label>
-        <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+        <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Photos}</label>
           <item>
             <label>placeholder</label>
@@ -633,10 +628,10 @@
         <trigger ref="Take_Photo">
           <label>{Take_Photo}</label>
         </trigger>
-        <select type="file" ref="Sketches" faims_attribute_name="Sketches" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+        <select type="file" ref="Sketches" faims_attribute_name="Sketches" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Sketches}</label>
           <item>
-            <label>{placeholder}</label>
+            <label>placeholder</label>
             <value>placeholder</value>
           </item>
         </select>
@@ -661,28 +656,28 @@
       <label>Spit</label>
       <group ref="Spit_Info">
         <label>Spit Info</label>
-        <input ref="Job_Name" faims_attribute_name="Spit Job Name" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+        <input ref="Job_Name" faims_attribute_name="Spit Job Name" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Job_Name}</label>
         </input>
-        <input ref="Trench_ID" faims_attribute_name="Spit Trench ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+        <input ref="Trench_ID" faims_attribute_name="Spit Trench ID" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Trench_ID}</label>
         </input>
-        <input ref="Author" faims_attribute_name="Spit Author" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+        <input ref="Author" faims_attribute_name="Spit Author" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Author}</label>
         </input> 
-        <input ref="Spit_ID" faims_attribute_name="Spit ID" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false" faims_read_only="false">
+        <input ref="Spit_ID" faims_attribute_name="Spit ID" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="false" faims_style_class="required">
           <label>{Spit_ID}</label>
         </input>
-        <input ref="Bucket_Count" faims_attribute_name="Bucket Count" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+        <input ref="Bucket_Count" faims_attribute_name="Bucket Count" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Bucket_Count}</label>
         </input>
-        <input ref="Thickness" faims_attribute_name="Thickness" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+        <input ref="Thickness" faims_attribute_name="Thickness" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Thickness}</label>
         </input>
-        <input ref="Artefact_Density" faims_attribute_name="Artefact Density" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+        <input ref="Artefact_Density" faims_attribute_name="Artefact Density" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Artefact_Density}</label>
         </input>
-        <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext" faims_certainty="true" faims_annotation="false" faims_read_only="false">
+        <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Notes}</label>
         </input>       
         <trigger ref="Update_And_New">
@@ -703,22 +698,22 @@
       <label>{Photograph_Log}</label>
       <group ref="Photograph_log">
         <label>{Photograph_Log}</label>
-        <input faims_certainty="false" faims_read_only="true" ref="Job_Name" faims_attribute_name="PL Job Name" faims_attribute_type="freetext">
+        <input ref="Job_Name" faims_attribute_name="PL Job Name" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Job_Name}</label>
         </input>  
-         <input faims_certainty="false" faims_read_only="true" ref="Trench_ID" faims_attribute_name="PL Trench ID" faims_attribute_type="freetext">
+         <input ref="Trench_ID" faims_attribute_name="PL Trench ID" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Trench_ID}</label>
         </input>
-        <input faims_certainty="false" faims_read_only="true" ref="Created_By">
+        <input ref="Created_By" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Author}</label>
         </input>
-        <input faims_certainty="false" faims_read_only="true" ref="Creation_Date">
+        <input ref="Creation_Date" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Timestamp}</label>
         </input>
-        <input faims_attribute_name="Photograph reference ID" faims_attribute_type="freetext" faims_read_only="false" ref="Photograph_reference_ID" faims_certainty="true">
+        <input ref="Photograph_reference_ID" faims_attribute_name="Photograph reference ID" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false" faims_style_class="required">
           <label>{Photograph_Log_ID}</label>
         </input>
-        <input faims_attribute_name="Scene type" faims_attribute_type="freetext" faims_certainty="true" faims_read_only="false" ref="Scene_type">
+        <input ref="Scene_type" faims_attribute_name="Scene type" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Description}</label>
         </input>
         <trigger ref="New">
@@ -739,22 +734,22 @@
       <label>{Notes}</label>
       <group ref="Notes">
         <label>{Notes}</label>
-        <input faims_certainty="false" faims_read_only="true" ref="Job_Name" faims_attribute_name="N Job Name" faims_attribute_type="freetext">
+        <input ref="Job_Name" faims_attribute_name="N Job Name" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Job_Name}</label>
         </input>    
-         <input faims_certainty="false" faims_read_only="true" ref="Trench_ID" faims_attribute_name="N Trench ID" faims_attribute_type="freetext">
+         <input ref="Trench_ID" faims_attribute_name="N Trench ID" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Trench_ID}</label>
         </input>   
-        <input faims_certainty="false" faims_read_only="true" ref="Created_By" faims_attribute_name="Author" faims_attribute_type="freetext">
+        <input ref="Created_By" faims_attribute_name="Author" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Author}</label>
         </input>
-        <input faims_certainty="false" faims_read_only="true" ref="Creation_Date" faims_attribute_name="Timestamp" faims_attribute_type="freetext">
+        <input ref="Creation_Date" faims_attribute_name="Timestamp" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="true">
           <label>{Timestamp}</label>
         </input>
-        <input faims_attribute_name="Note Label" faims_attribute_type="freetext" faims_read_only="false" ref="Note_Label" faims_certainty="true">
+        <input ref="Note_Label" faims_attribute_name="Note Label" faims_attribute_type="measure"  faims_certainty="false" faims_annotation="false" faims_read_only="false" faims_style_class="required">
           <label>{Note_Label}</label>
         </input>
-        <input faims_attribute_name="Note" faims_attribute_type="freetext" faims_certainty="true" faims_read_only="false" ref="Note">
+        <input ref="Note" faims_attribute_name="Note" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false" >
           <label>{Note}</label>
         </input>
         <trigger ref="New">

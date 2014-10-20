@@ -1,11 +1,90 @@
+import java.util.concurrent.Callable;
 /*** 'Editable' - you can edit the code below based on the needs ***/
 User user; // don't touch
 String userid;
 
+addActionBarItem("sync", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Sync enabled";
+    }
+    actionOn() {
+        setSyncEnabled(false);
+        setFileSyncEnabled(false);
+        showToast("Sync disabled.");
+    }
+    isActionOff() {
+        isSyncEnabled();
+    }
+    actionOffLabel() {
+        "Sync disabled";
+    }
+    actionOff() {
+        setSyncEnabled(true);
+        setFileSyncEnabled(true);
+        showToast("Sync enabled.");
+    }
+});
+
+addActionBarItem("internal_gps", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Internal GPS enabled";
+    }
+    actionOn() {
+        stopGPS();
+        showToast("GPS disabled.");
+        updateTrackStatus();
+    }
+    isActionOff() {
+        isInternalGPSOn();
+    }
+    actionOffLabel() {
+        "Internal GPS disabled";
+    }
+    actionOff() {
+        if(isExternalGPSOn()) {
+            stopGPS();
+        }
+        startInternalGPS();
+        showToast("GPS enabled.");
+        updateTrackStatus();
+    }
+});
+
+addActionBarItem("external_gps", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "External GPS enabled";
+    }
+    actionOn() {
+        stopGPS();
+        showToast("GPS disabled.");
+        updateTrackStatus();
+
+    }
+    isActionOff() {
+        isExternalGPSOn();
+    }
+    actionOffLabel() {
+        "External GPS disabled";
+    }
+    actionOff() {
+        if(isInternalGPSOn()) {
+            stopGPS();
+        }
+        startExternalGPS();
+        if(isBluetoothConnected()) {
+            showToast("GPS enabled.");
+        } else {
+            showToast("Please enable bluetooth.");
+            this.isActionOff();
+        }
+        updateTrackStatus();
+    }
+});
+
 makeLocalID(){
-    fetchOne("CREATE TABLE IF NOT EXISTS localSettings (key text primary key, value text);");
-    fetchOne("drop view if exists identifierAsSpreadsheet;");
-    fetchOne("create view identifierAsSpreadsheet as select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' ') as response from (select * from latestNonDeletedArchentIdentifiers order by attributename) group by uuid;");
+    fetchOne("CREATE TABLE IF NOT EXISTS localSettings (key text primary key, value text);", null);
+    fetchOne("drop view if exists identifierAsSpreadsheet;", null);
+    fetchOne("create view identifierAsSpreadsheet as select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' ') as response from (select * from latestNonDeletedArchentIdentifiers order by attributename) group by uuid;", null);
 }
 
 makeLocalID();
@@ -17,45 +96,43 @@ onEvent("control/Excavation_Data/TrenchList", "click", "loadTrench()");
 onEvent("control/Units", "show", "refreshUnitList()");
 onEvent("control/Units/UnitList", "click", "loadUnit()");
 
-refreshTrenchList(){
-    populateList("control/Excavation_Data/TrenchList", 
-        fetchAll("SELECT uuid, group_concat(coalesce(freetext, ''),' - ') as response " +
-        "FROM (select * from latestNonDeletedArchentIdentifiers order by case attributename when 'Job Name' then 1 when 'Trench ID' then 2 end ) " +
-        "WHERE aenttypename = 'Trench' " +
-        "GROUP BY uuid " +
-        "order by response;"));
-}
-
-refreshUnitList(){
-    populateList("control/Units/UnitList",
-        fetchAll("select childuuid, trench.response || ' - ' || unit.response " +
-        "from (select uuid, response from identifierasspreadsheet join latestnondeletedarchent using (uuid) join aenttype using (aenttypeid) where aenttypename = 'Trench') trench join latestnondeletedaentreln parent using (uuid) join latestnondeletedaentreln child using (relationshipid) join  " +
-        "(select uuid as childuuid, response from identifierasspreadsheet join latestnondeletedarchent using (uuid) join aenttype using (aenttypeid) where aenttypename = 'Unit') unit on (child.uuid = childuuid); "));
-}
-
 setIDNull() {
     trench_id = null;
     unit_id = null;
+    removeNavigationButton("save");
+    removeNavigationButton("delete");
+}
+
+refreshTrenchList(){
+    fetchAll("SELECT uuid, group_concat(coalesce(measure, ''),' - ') as response " +
+    "FROM (select * from latestNonDeletedArchentIdentifiers order by case attributename when 'Job Name' then 1 when 'Trench ID' then 2 end ) " +
+    "WHERE aenttypename = 'Trench' " +
+    "GROUP BY uuid " +
+    "order by response;", new FetchCallback() {
+        onFetch(result) {
+            populateList("control/Excavation_Data/TrenchList", result);
+        }
+    });
+}
+
+refreshUnitList(){
+    fetchAll("select childuuid, trench.response || ' - ' || unit.response " +
+    "from (select uuid, response from identifierasspreadsheet join latestnondeletedarchent using (uuid) join aenttype using (aenttypeid) where aenttypename = 'Trench') trench join latestnondeletedaentreln parent using (uuid) join latestnondeletedaentreln child using (relationshipid) join  " +
+    "(select uuid as childuuid, response from identifierasspreadsheet join latestnondeletedarchent using (uuid) join aenttype using (aenttypeid) where aenttypename = 'Unit') unit on (child.uuid = childuuid); ",
+    new FetchCallback() {
+        onFetch(result) {
+            populateList("control/Units/UnitList", result);
+        }
+    });
 }
 
 /*** ARCHENT: Trench ***/
+onEvent("Trench", "show", "autosaveTrench();showSlopeTab(true);addTrenchNavigation();");
 
-onEvent("Trench/PhotoLog", "show", "loadRelatedPhotologs()");
-onEvent("Trench/PhotoLog/newPhotoLog", "delayclick", "saveTrench(\"newPhotolog();\")");
-onEvent("Trench/PhotoLog/ListPhotoLog", "click", "loadPhotolog();");
-
-onEvent("Trench/Notes", "show", "loadRelatedNotes()");
-onEvent("Trench/Notes/newNote", "delayclick", "saveTrench(\"newNote();\")");
-onEvent("Trench/Notes/ListNotes", "click", "loadNote();");
-
-onEvent("Trench", "show", "showSlopeTab(true)");
-
-onEvent("Trench/Trench_Info/Update", "delayclick", "saveTrench(\"\")");
-onEvent("Trench/Trench_Info/Update_And_New", "delayclick", "saveTrench(\"newTrench(true);showSlopeTab(true);\")");
-onEvent("Trench/Slope/Update", "delayclick", "saveTrench(\"\")");
+onFocus("Trench/Trench_Info/Trench_ID", null, "activateAutoSaveTrench()");
+onEvent("Trench/Trench_Info/Update_And_New", "delayclick", "saveAndNewTrench();");
 
 onEvent("Trench/Trench_Info/Delete", "delayclick", "deleteTrench()");
-onEvent("Trench/Slope/Delete", "delayclick", "deleteTrench()");
 
 onEvent("Trench/Trench_Info/Take_GPS", "click", "fillInGPS(\"Trench/Trench_Info/\")");
 onEvent("Trench/Trench_Info/Fill_Slope_Details", "click", "showSlopeTab(false)");
@@ -65,12 +142,20 @@ onEvent("Trench/Trench_Info/Attach_Sketches", "click", "attachFileTo(\"Trench/Tr
 onEvent("Trench/Trench_Info/View_Attached", "click", "viewArchEntAttachedFiles(trench_id)");
 
 onEvent("Trench/Units", "show", "refreshRelatedUnits()");
-onEvent("Trench/Units/New_Unit", "delayclick", "saveTrench(\"newUnit()\")");
+onEvent("Trench/Units/New_Unit", "delayclick", "saveTrenchAndNewUnit();");
 onEvent("Trench/Units/Unit_List", "click", "loadUnit()");
 
 onEvent("Trench/Spits", "show", "refreshRelatedSpits()");
-onEvent("Trench/Spits/New_Spit", "delayclick", "saveTrench(\"newSpit()\")");
+onEvent("Trench/Spits/New_Spit", "delayclick", "saveTrenchAndNewSpit();");
 onEvent("Trench/Spits/Spit_List", "click", "loadSpit()");
+
+onEvent("Trench/PhotoLog", "show", "loadRelatedPhotologs()");
+onEvent("Trench/PhotoLog/newPhotoLog", "delayclick", "saveTrenchAndNewPhotolog();");
+onEvent("Trench/PhotoLog/ListPhotoLog", "click", "loadPhotolog();");
+
+onEvent("Trench/Notes", "show", "loadRelatedNotes()");
+onEvent("Trench/Notes/newNote", "delayclick", "saveTrenchAndNewNote();");
+onEvent("Trench/Notes/ListNotes", "click", "loadNote();");
 
 String trench_id = null;
 
@@ -98,34 +183,109 @@ loadTrench() {
 }
 
 loadTrenchFrom(archentid) {
-    trench_id = archentid;
-    if (isNull(trench_id)) {
+    if (isNull(archentid)) {
         showToast("No Trench selected");
         return;
     }
-    showTabGroup("Trench", trench_id);
+    showTabGroup("Trench", archentid, new FetchCallback() {
+        onFetch(result) {
+            trench_id = archentid;
+            saveTabGroup("Trench", trench_id, null, null, new SaveCallback() {
+                onSave(uuid, newRecord) {
+                    trench_id = uuid;
+                }
+            }, true);
+        }
+    });
 }
 
-saveTrench(String callback) {
+activateAutoSaveTrench() {
+    if(!isNull(trench_id)) return;
+    if(isNull(getFieldValue("Trench/Trench_Info/Trench_ID"))) return;
+    saveTabGroup("Trench", trench_id, null, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            trench_id = uuid;
+            if(newRecord) {
+                setCounters();
+            }
+            saveTabGroup("Trench", trench_id, null, null, new SaveCallback() {
+                onSave(uuid, newRecord) {
+                    trench_id = uuid;
+                }
+            }, true);
+        }
+    });
+}
+
+autosaveTrench() {
+    if(isNull(trench_id)) return;
+    saveTabGroup("Trench", trench_id, null, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            trench_id = uuid;
+        }
+    }, true);
+}
+
+saveTrench(Callable callback) {
     if (isNull(getFieldValue("Trench/Trench_Info/Trench_ID"))) {
         showWarning("Validation Error", "Cannot save Trench without identifiers");
         return;
     }
-    
-    if (!isNull(trench_id)) {
-        entity = fetchArchEnt(trench_id);
-        saveTabGroup("Trench", trench_id, null, null, "trench_id = getLastSavedRecordId();refreshAttachments();" + callback);
-
-    } else {
-        saveTabGroup("Trench", trench_id, null, null, "trench_id = getLastSavedRecordId();refreshAttachments(); setCounters();" + callback);
-
-    }
+    saveTabGroup("Trench", trench_id, null, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            trench_id = uuid;
+            if(newRecord) {
+                setCounters();
+            }
+            callback.call();
+        }
+    });
 }
 
-setCounters(){
-    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit"+ trench_id +"', 1);");
-    print("counters set");
-    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit"+ trench_id +"', 1);"); 
+saveAndNewTrench() {
+    saveTrench(new Callable() {
+        call() {
+            newTrench(true);
+            showSlopeTab(true);
+        }
+    });
+}
+
+saveTrenchAndNewUnit() {
+    saveTrench(new Callable() {
+        call() {
+            newUnit();
+        }
+    });
+}
+
+saveTrenchAndNewSpit() {
+    saveTrench(new Callable() {
+        call() {
+            newSpit();
+        }
+    });
+}
+
+saveTrenchAndNewPhotolog() {
+    saveTrench(new Callable() {
+        call() {
+            newPhotolog();
+        }
+    });
+}
+
+saveTrenchAndNewNote() {
+    saveTrench(new Callable() {
+        call() {
+            newNote();
+        }
+    });
+}
+
+setCounters() {
+    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit"+ trench_id +"', 1);", null);
+    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit"+ trench_id +"', 1);", null); 
 }
 
 deleteTrench() {
@@ -142,45 +302,68 @@ reallyDeleteTrench() {
 }
 
 loadTrenchAttributes() {
-    populateDropDown("Trench/Trench_Info/Dimensions", makeVocab("Dimensions"));
-    populateRadioGroup("Trench/Trench_Info/Artefacts_Present", makeVocab("Artefacts Present"));
-    populateCheckBoxGroup("Trench/Trench_Info/Landform_Genesis", makeVocab("Landform Genesis"));
-    populateCheckBoxGroup("Trench/Trench_Info/Landform_Element", makeVocab("Landform Element"));
-    populateDropDown("Trench/Trench_Info/Geomorphic_Context", makeVocab("Geomorphic Context"));
-    populateCheckBoxGroup("Trench/Trench_Info/Samples_Collected", makeVocab("Samples Collected"));
-    populateDropDown("Trench/Slope/Slope_Detail", makeVocab("Slope Detail"));
-    populateDropDown("Trench/Slope/Slope_Detail_2", makeVocab("Slope Detail 2"));
+    makeVocab("DropDown", "Trench/Trench_Info/Dimensions", "Dimensions");
+    makeVocab("RadioGroup", "Trench/Trench_Info/Artefacts_Present", "Artefacts Present");
+    makeVocab("CheckBoxGroup", "Trench/Trench_Info/Landform_Genesis", "Landform Genesis");
+    makeVocab("CheckBoxGroup", "Trench/Trench_Info/Landform_Element", "Landform Element");
+    makeVocab("DropDown", "Trench/Trench_Info/Geomorphic_Context", "Geomorphic Context");
+    makeVocab("CheckBoxGroup", "Trench/Trench_Info/Samples_Collected", "Samples Collected");
+    makeVocab("DropDown", "Trench/Slope/Slope_Detail", "Slope Detail");
+    makeVocab("DropDown", "Trench/Slope/Slope_Detail_2", "Slope Detail 2");
+}
+
+addTrenchNavigation() {
+    removeNavigationButton("save");
+    removeNavigationButton("delete");
+
+    addNavigationButton("save", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save {Trench}";
+        }
+        actionOn() {
+            saveTrench(null);
+        }
+    }, "success");
+
+    addNavigationButton("delete", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Delete {Trench}";
+        }
+        actionOn() {
+            deleteTrench();
+        }
+    }, "danger");
 }
 
 showSlopeTab(Boolean onLoad) {
-    for(vocabid : getFieldValue("Trench/Trench_Info/Landform_Element")) {
-        if(getVocabName(vocabid.getName()).equals("{bSlope}")) {
-            showTab("Trench/Slope");
-            return;
-        }
-    }
-    if(!onLoad) {
-        showToast("Slope was not selected in Landform Element");
-    } else {
-        showTab("Trench/Slope");
-        cancelTab("Trench/Slope", false);
-    }
+    // TODO WHTF?
+    // fetchOne("select vocabid from vocabulary where vocabname = '{Slope}' join attributekey using (attributeid) where attributename = '"+attrib+"' ", new FetchCallback() {
+    //     onFetch(result) {
+    //         print(result);
+    //     }
+    // });
+    // "select vocabName from vocabulary where vocabid = '"+ vocabid +"';"
+    // callbackIfTrue = new Callable() {
+
+    // }
+    // for(vocabid : getFieldValue("Trench/Trench_Info/Landform_Element")) {
+    //     if(getVocabName(vocabid.getName()).equals("{Slope}")) {
+    //         showTab("Trench/Slope");
+    //         return;
+    //     }
+    // }
+    // if(!onLoad) {
+    //     showToast("Slope was not selected in Landform Element");
+    // } else {
+    //     showTab("Trench/Slope");
+    //     cancelTab("Trench/Slope", false);
+    // }
     return;
 }
 
-refreshAttachments() {
-    pictures = _convertPairsToList(getFieldValue("Trench/Trench_Info/Photos"));
-    populateCameraPictureGallery("Trench/Trench_Info/Photos", pictures);
-    setFieldValue("Trench/Trench_Info/Photos", _convertListToPairs(pictures));
-    sketches = _convertPairsToList(getFieldValue("Trench/Trench_Info/Sketches"));
-    populateCheckBoxGroup("Trench/Trench_Info/Sketches", sketches);
-    setFieldValue("Trench/Trench_Info/Sketches", _convertListToPairs(sketches));
-}
-
 refreshRelatedUnits() {
-    ArrayList units = new ArrayList();
     if(!isNull(trench_id)) {
-         units = fetchAll("select uuid, aenttypename || ' ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
+        fetchAll("select uuid, aenttypename || ' ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
             "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
             "            FROM latestNonDeletedArchentIdentifiers\n"+
             "           WHERE aenttypename = 'Unit'\n"+
@@ -195,15 +378,20 @@ refreshRelatedUnits() {
             "                             and uuid != "+trench_id+")\n"+
             "        ORDER BY uuid, attributename DESC)\n"+
             "group by uuid\n"+
-            "order by valuetimestamp desc, uuid, attributename;");
+            "order by valuetimestamp desc, uuid, attributename;", new FetchCallback() {
+                onFetch(result) {
+                    populateList("Trench/Units/Unit_List", result);
+                }
+            });
+    } else {
+        populateList("Trench/Units/Unit_List", new ArrayList());
     }
-    populateList("Trench/Units/Unit_List", units);
+    
 }
 
 refreshRelatedSpits() {
-    ArrayList spits = new ArrayList();
     if(!isNull(trench_id)) {
-         spits = fetchAll("select uuid, aenttypename || ' ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
+        fetchAll("select uuid, aenttypename || ' ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
             "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
             "            FROM latestNonDeletedArchentIdentifiers\n"+
             "           WHERE aenttypename = 'Spit'\n"+
@@ -218,15 +406,19 @@ refreshRelatedSpits() {
             "                             and uuid != "+trench_id+")\n"+
             "        ORDER BY uuid, attributename DESC)\n"+
             "group by uuid\n"+
-            "order by valuetimestamp desc, uuid, attributename;");
+            "order by valuetimestamp desc, uuid, attributename;", new FetchCallback() {
+                onFetch(result) {
+                    populateList("Trench/Spits/Spit_List", result);
+                }
+            });
+    } else {
+        populateList("Trench/Spits/Spit_List", new ArrayList());
     }
-    populateList("Trench/Spits/Spit_List", spits);
 }
 
 loadRelatedPhotologs() {
-    Object photologs = new ArrayList();
     if (!isNull(trench_id)){
-        photologs = fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
+        fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
             "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
             "            FROM latestNonDeletedArchentIdentifiers\n"+
             "           WHERE aenttypename = 'Photograph log'\n"+
@@ -241,15 +433,19 @@ loadRelatedPhotologs() {
             "                             and uuid != "+trench_id+")\n"+
             "        ORDER BY uuid, attributename ASC)\n"+
             "group by uuid\n"+
-            "order by valuetimestamp desc, uuid, attributename;");
+            "order by valuetimestamp desc, uuid, attributename;", new FetchCallback() {
+                onFetch(result) {
+                    populateList("Trench/PhotoLog/ListPhotoLog",  result);
+                }
+            });
+    } else {
+        populateList("Trench/PhotoLog/ListPhotoLog",  new ArrayList());
     }
-    populateList("Trench/PhotoLog/ListPhotoLog",  photologs);
 }
 
 loadRelatedNotes() {
-    Object notes = new ArrayList();
     if (!isNull(trench_id)){
-        notes = fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
+        fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' - ') as response, valuetimestamp\n"+
             "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
             "            FROM latestNonDeletedArchentIdentifiers\n"+
             "           WHERE aenttypename = 'Notes'\n"+
@@ -264,23 +460,31 @@ loadRelatedNotes() {
             "                             and uuid != "+trench_id+")\n"+
             "        ORDER BY uuid, attributename ASC)\n"+
             "group by uuid\n"+
-            "order by valuetimestamp desc, uuid, attributename;");
+            "order by valuetimestamp desc, uuid, attributename;", new FetchCallback() {
+                onFetch(result) {
+                    populateList("Trench/Notes/ListNotes", result);
+                }
+            });
+    } else {
+        populateList("Trench/Notes/ListNotes", new ArrayList());
     }
-    populateList("Trench/Notes/ListNotes", notes);
 }
 
 /*** ARCHENT: Unit ***/
-onEvent("Unit", "show", "showGrassRootsTab(true)");
+onEvent("Unit", "show", "showGrassRootsTab(true);addUnitNavigation();");
 
-onEvent("Unit/Soil/Update_And_New", "delayclick", "saveUnit(\"newUnit();showGrassRootsTab(true);\")");
+onFocus("Unit/Soil/Unit_ID", null, "activateAutoSaveUnit();");
+onFocus("Unit/Soil/Horizon", null, "activateAutoSaveUnit();");
 
-onEvent("Unit/Soil/Update_And_Close", "delayclick", "saveUnit(\"cancelTabGroup(\\\"Unit\\\",false);showTab(\\\"Trench/Units\\\");\")");
+onEvent("Unit/Soil/Update_And_New", "delayclick", "saveAndNewUnit();");
+
+onEvent("Unit/Soil/Update_And_Close", "delayclick", "saveAndCloseUnit();");
 
 onEvent("Unit/Soil/Delete", "delayclick", "deleteUnit()");
 onEvent("Unit/Add/Delete", "delayclick", "deleteUnit()");
 
 onEvent("Unit/Soil/Fill_Grass_Roots_Details", "click", "showGrassRootsTab(false)");
-onEvent("Unit/Grass_Roots/Back", "delayclick", "saveUnit(\"showTab(\\\"Unit/Soil\\\");\")");
+onEvent("Unit/Grass_Roots/Back", "delayclick", "grassrootsBack();");
 
 onEvent("Unit/Add/Take_Photo", "click", "attachPictureTo(\"Unit/Add/Photos\")");
 onEvent("Unit/Add/Attach_Sketches", "click", "attachFileTo(\"Unit/Add/Sketches\")");
@@ -296,10 +500,10 @@ newUnit() {
     }
     unit_id = null;
     newTabGroup("Unit");
-    autoNumUnit();
     setFieldValue("Unit/Soil/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
     setFieldValue("Unit/Soil/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
     setFieldValue("Unit/Soil/Author", username);
+    autoNumUnit();
 }
 
 loadUnit() {
@@ -308,31 +512,105 @@ loadUnit() {
 }
 
 loadUnitFrom(archentid) {
-    unit_id = archentid;
-    if (isNull(unit_id)) {
+    if (isNull(archentid)) {
         showToast("No Unit selected");
         return;
     }
-    showTabGroup("Unit", unit_id);
+    showTabGroup("Unit", unit_id, new FetchCallback() {
+        onFetch(result) {
+            unit_id = archentid;
+            saveTabGroup("Unit", unit_id, null, null, new SaveCallback() {
+                onSave(uuid, newRecord) {
+                    unit_id = uuid;
+                    updateUnitCounter(null);
+                }
+            }, true);
+        }
+    });
 }
 
-saveUnit(String callback) {
+activateAutoSaveUnit() {
+    if(!isNull(unit_id)) return;
+    if (isNull(getFieldValue("Unit/Soil/Unit_ID")) || isNull(getFieldValue("Unit/Soil/Horizon"))) return;
+    saveTabGroup("Unit", unit_id, null, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            unit_id = uuid;
+            updateUnitCounter(null);
+            saveTabGroup("Unit", unit_id, null, null, new SaveCallback() {
+                onSave(uuid, newRecord) {
+                    unit_id = uuid;
+                    updateUnitCounter(null);
+                }
+            }, true);
+        }
+    });
+}
+
+saveUnit(Callable callback) {
     if (isNull(getFieldValue("Unit/Soil/Unit_ID")) || isNull(getFieldValue("Unit/Soil/Horizon"))) {
         showWarning("Validation Error", "Cannot save Unit without ID or Horizon");
         return;
     }
-    
-    if (!isNull(unit_id)) {
-        entity = fetchArchEnt(unit_id);
-    } else {
-        next_unit_id = fetchOne("select value from localSettings where key = 'Unit"+ trench_id +"';").get(0);
-        if(Integer.parseInt(getFieldValue("Unit/Soil/Unit_ID")) >= Integer.parseInt(next_unit_id)) {
-            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit"+ trench_id +"', "+ getFieldValue("Unit/Soil/Unit_ID") +"+1);");
-        } else {
-            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit"+ trench_id +"', "+ next_unit_id +");");    
+    saveTabGroup("Unit", unit_id, null, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            unit_id = uuid;
+            if(newRecord) {
+                saveEntitiesToRel("TrenchUnit", trench_id, unit_id);
+            }
+            updateUnitCounter(callback);
         }
-    }
-    saveTabGroup("Unit", unit_id, null, null, "unit_id = getLastSavedRecordId(); saveEntitiesToRel(\"TrenchUnit\", trench_id, unit_id);" + callback);
+    });
+}
+
+saveAndNewUnit() {
+    saveUnit(new Callable() {
+        call() {
+            newUnit();
+            showGrassRootsTab(true);
+        }
+    });
+}
+
+saveAndCloseUnit() {
+    saveUnit(new Callable() {
+        call() {
+            cancelTabGroup("Unit",false);
+            showTab("Trench/Units");
+        }
+    });
+}
+
+grassrootsBack() {
+    saveUnit(new Callable() {
+        call() {
+            showTab("Unit/Soil");
+        }
+    });
+}
+
+updateUnitCounter(Callable callback) {
+    fetchOne("select value from localSettings where key = 'Unit"+ trench_id +"';", new FetchCallback() {
+        onFetch(result) {
+            next_unit_id = result.get(0);
+            try {
+                if(Integer.parseInt(getFieldValue("Unit/Soil/Unit_ID")) >= Integer.parseInt(next_unit_id)) {
+                    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit"+ trench_id +"', "+ getFieldValue("Unit/Soil/Unit_ID") +"+1);", new FetchCallback() {
+                        onFetch(result) {
+                            if(callback != null) callback.call();
+                        }
+                    });
+                } else {
+                    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit"+ trench_id +"', "+ next_unit_id +");", new FetchCallback() {
+                        onFetch(result) {
+                            if(callback != null) callback.call();
+                        }
+                    });
+                }
+            } catch (NumberFormatException e) {
+                return;
+            }
+        }
+    });
 }
 
 deleteUnit() {
@@ -360,41 +638,69 @@ reallyDeleteUnit() {
 
 loadUnitAttributes() {
     populateHierarchicalDropDown("Unit/Soil/Texture", "Texture");
-    populateDropDown("Unit/Soil/Moisture", makeVocab("Moisture"));
-    populateDropDown("Unit/Soil/Grain_size", makeVocab("Grain size"));
-    populateDropDown("Unit/Soil/Consistency", makeVocab("Consistency"));
-    populateDropDown("Unit/Soil/Cementation", makeVocab("Cementation"));
-    populateCheckBoxGroup("Unit/Soil/Inclusions", makeVocab("Inclusions"));
-    populateCheckBoxGroup("Unit/Soil/Disturbance", makeVocab("Disturbance"));
-    populateRadioGroup("Unit/Soil/Artefacts", makeVocab("Artefacts"));
-    populateDropDown("Unit/Grass_Roots/Root_Size", makeVocab("Root Size"));
-    populateDropDown("Unit/Grass_Roots/Root_Abundance", makeVocab("Root Abundance"));
+    makeVocab("DropDown", "Unit/Soil/Moisture", "Moisture");
+    makeVocab("DropDown", "Unit/Soil/Grain_size", "Grain size");
+    makeVocab("DropDown", "Unit/Soil/Consistency", "Consistency");
+    makeVocab("DropDown", "Unit/Soil/Cementation", "Cementation");
+    makeVocab("CheckBoxGroup", "Unit/Soil/Inclusions", "Inclusions");
+    makeVocab("CheckBoxGroup", "Unit/Soil/Disturbance", "Disturbance");
+    makeVocab("RadioGroup", "Unit/Soil/Artefacts", "Artefacts");
+    makeVocab("DropDown", "Unit/Grass_Roots/Root_Size", "Root Size");
+    makeVocab("DropDown", "Unit/Grass_Roots/Root_Abundance", "Root Abundance");
+}
+
+addUnitNavigation() {
+    removeNavigationButton("save");
+    removeNavigationButton("delete");
+
+    addNavigationButton("save", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save {Unit}";
+        }
+        actionOn() {
+            saveUnit(null);
+        }
+    }, "success");
+
+    addNavigationButton("delete", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Delete {Unit}";
+        }
+        actionOn() {
+            deleteUnit();
+        }
+    }, "danger");
 }
 
 autoNumUnit() {
-    next_unit_id = fetchOne("select value from localSettings where key = 'Unit"+ trench_id +"';").get(0);
-    setFieldValue("Unit/Soil/Unit_ID", next_unit_id); 
+    fetchOne("select value from localSettings where key = 'Unit"+ trench_id +"';", new FetchCallback() {
+        onFetch(result) {
+            setFieldValue("Unit/Soil/Unit_ID", result.get(0));
+        }
+    });
 }
 
 showGrassRootsTab(Boolean onLoad) {
-    for(vocabid : getFieldValue("Unit/Soil/Inclusions")) {
-        if(getVocabName(vocabid.getName()).equals("{bGrass_roots}")) {
-            showTab("Unit/Grass_Roots");
-            return;
-        }
-    }
-    if(!onLoad) {
-        showToast("Grass Roots was not selected in Inclusions");
-    } else {
-        showTab("Unit/Grass_Roots");
-        cancelTab("Unit/Grass_Roots", false);
-    }
+    // for(vocabid : getFieldValue("Unit/Soil/Inclusions")) {
+    //     if(getVocabName(vocabid.getName()).equals("{Grass_roots}")) {
+    //         showTab("Unit/Grass_Roots");
+    //         return;
+    //     }
+    // }
+    // if(!onLoad) {
+    //     showToast("Grass Roots was not selected in Inclusions");
+    // } else {
+    //     showTab("Unit/Grass_Roots");
+    //     cancelTab("Unit/Grass_Roots", false);
+    // }
     return;
 }
 
-/*** ARCHENT: Unit ***/
-onEvent("Spit/Spit_Info/Update_And_New", "delayclick", "saveSpit(\"newSpit()\")");
-onEvent("Spit/Spit_Info/Update_And_Close", "delayclick", "saveSpit(\"cancelTabGroup(\\\"Spit\\\", false);showTab(\\\"Trench/Spits\\\")\")");
+/*** ARCHENT: Spit ***/
+onEvent("Spit", "show", "addSpitNavigation();");
+
+onEvent("Spit/Spit_Info/Update_And_New", "delayclick", "saveAndNewSpit();");
+onEvent("Spit/Spit_Info/Update_And_Close", "delayclick", "saveAndCloseSpit();");
 onEvent("Spit/Spit_Info/Delete", "delayclick", "deleteSpit()");
 
 String spit_id = null;
@@ -402,10 +708,10 @@ String spit_id = null;
 newSpit() {
     spit_id = null;
     newTabGroup("Spit");
-    autoNumSpit();
     setFieldValue("Spit/Spit_Info/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
     setFieldValue("Spit/Spit_Info/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
     setFieldValue("Spit/Spit_Info/Author", username);
+    autoNumSpit();
 }
 
 loadSpit() {
@@ -413,32 +719,81 @@ loadSpit() {
     loadSpitFrom(spit_id);
 }
 
-loadSpitFrom(archentid) {
-    spit_id = archentid;
-    if (isNull(spit_id)) {
+loadSpitFrom(archentid) {    
+    if (isNull(archentid)) {
         showToast("No Spit selected");
         return;
     }
-    showTabGroup("Spit", spit_id);
+    showTabGroup("Spit", archentid, new FetchCallback() {
+        onFetch(result) {
+            spit_id = archentid;
+            saveTabGroup("Spit", spit_id, null, null, new SaveCallback() {
+                onSave(uuid, newRecord) {
+                    spit_id = uuid;
+                    updateSpitCounter(null);
+                }
+            }, true);
+        }
+    });
 }
 
-saveSpit(String callback) {
+saveSpit(Callable callback) {
     if (isNull(getFieldValue("Spit/Spit_Info/Spit_ID"))) {
         showWarning("Validation Error", "Cannot save Spit without ID");
         return;
     }
-    
-    if (!isNull(spit_id)) {
-        entity = fetchArchEnt(spit_id);
-    } else {
-        next_spit_id = fetchOne("select value from localSettings where key = 'Spit"+ trench_id +"';").get(0);
-        if(Integer.parseInt(getFieldValue("Spit/Spit_Info/Spit_ID")) >= Integer.parseInt(next_spit_id)) {
-            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit"+ trench_id +"', "+ getFieldValue("Spit/Spit_Info/Spit_ID") +"+1);");
-        } else {
-            fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit"+ trench_id +"', "+ next_spit_id +");");
+    saveTabGroup("Spit", spit_id, null, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            spit_id = uuid;
+            if(newRecord) {
+                saveEntitiesToRel("TrenchSpit", trench_id, spit_id);
+            }
+            updateSpitCounter(callback);
         }
-    }
-    saveTabGroup("Spit", spit_id, null, null, "spit_id = getLastSavedRecordId(); saveEntitiesToRel(\"TrenchSpit\", trench_id, spit_id);" + callback);
+    });
+}
+
+saveAndNewSpit() {
+    saveSpit(new Callable() {
+        call() {
+            spit_id = null;
+            newSpit();
+        }
+    });
+}
+
+saveAndCloseSpit() {
+    saveSpit(new Callable() {
+        call() {
+            cancelTabGroup("Spit", false);
+            showTab("Trench/Spits");
+        }
+    });
+}
+
+updateSpitCounter(Callable callback) {
+    fetchOne("select value from localSettings where key = 'Spit"+ trench_id +"';", new FetchCallback() {
+        onFetch(result) {
+            next_spit_id = result.get(0);
+            try {
+                if(Integer.parseInt(getFieldValue("Spit/Spit_Info/Spit_ID")) >= Integer.parseInt(next_spit_id)) {
+                    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit"+ trench_id +"', "+ getFieldValue("Spit/Spit_Info/Spit_ID") +"+1);", new FetchCallback() {
+                        onFetch(result) {
+                            if(callback != null) callback.call();
+                        }
+                    });
+                } else {
+                    fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit"+ trench_id +"', "+ next_spit_id +");", new FetchCallback() {
+                        onFetch(result) {
+                            if(callback != null) callback.call();
+                        }
+                    });
+                }    
+            } catch(NumberFormatException e) {
+                return;
+            }
+        }
+    });
 }
 
 deleteSpit() {
@@ -456,26 +811,69 @@ reallyDeleteSpit() {
     showTab("Trench/Spits");
 }
 
+addSpitNavigation() {
+    removeNavigationButton("save");
+    removeNavigationButton("delete");
+
+    addNavigationButton("save", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save {Spit}";
+        }
+        actionOn() {
+            saveSpit(null);
+        }
+    }, "success");
+
+    addNavigationButton("delete", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Delete {Spit}";
+        }
+        actionOn() {
+            deleteSpit();
+        }
+    }, "danger");
+}
+
 autoNumSpit() {
-    next_spit_id = fetchOne("select value from localSettings where key = 'Spit"+ trench_id +"';").get(0);
-    setFieldValue("Spit/Spit_Info/Spit_ID", next_spit_id); 
+    fetchOne("select value from localSettings where key = 'Spit"+ trench_id +"';", new FetchCallback() {
+        onFetch(result) {
+            setFieldValue("Spit/Spit_Info/Spit_ID", result.get(0));
+            saveSpit(new Callable() {
+                call() {
+                    saveTabGroup("Spit", spit_id, null, null, new SaveCallback() {
+                        onSave(uuid, newRecord) {
+                            spit_id = uuid;
+                            updateSpitCounter(null);
+                        }
+                    }, true);
+                }
+            });
+        }
+    });
 }
 
 /*** Photolog Stuff ***/
-onEvent("Photograph_log/Photograph_log/New", "delayclick", "savePhotolog(\"newPhotolog();\")");
-onEvent("Photograph_log/Photograph_log/Close", "delayclick", "savePhotolog(\"closePhotoLog();\")");
-onEvent("Photograph_log/Photograph_log/Delete", "delayclick", "deletePhotolog()");
+onEvent("Photograph_log", "show", "addPhotologNavigation();");
+
+onFocus("Photograph_log/Photograph_log/Photograph_reference_ID", null, "activateAutoSavePhotolog();");
+
+onEvent("Photograph_log/Photograph_log/New", "delayclick", "saveAndNewPhotolog();");
+onEvent("Photograph_log/Photograph_log/Close", "delayclick", "saveAndClosePhotolog();");
+onEvent("Photograph_log/Photograph_log/Delete", "delayclick", "deletePhotolog();");
 
 String photolog_id;
 
 newPhotolog(){
     photolog_id = null;
     newTabGroup("Photograph_log");
-    date = fetchOne("select datetime('now', 'localtime');");
-    setFieldValue("Photograph_log/Photograph_log/Creation_Date", date.get(0));
     setFieldValue("Photograph_log/Photograph_log/Created_By", username);
     setFieldValue("Photograph_log/Photograph_log/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
     setFieldValue("Photograph_log/Photograph_log/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
+    fetchOne("select datetime('now', 'localtime');", new FetchCallback() {
+        onFetch(result) {
+            setFieldValue("Photograph_log/Photograph_log/Creation_Date", result.get(0));        
+        }
+    });
 }
 
 loadPhotolog() {
@@ -484,37 +882,79 @@ loadPhotolog() {
 }
 
 loadPhotologFrom(archent_id) {
-    photolog_id = archent_id;
-    if (isNull(photolog_id)) {
+    if (isNull(archent_id)) {
         showToast("No record selected");
         return;
     }
-    
-    showTabGroup("Photograph_log", photolog_id);
-    Object created = fetchOne("select datetime(aenttimestamp, 'localtime'), fname || ' ' || lname from archentity join user using (userid) where uuid = "+photolog_id+" group by uuid having min(aenttimestamp)");
-    setFieldValue("Photograph_log/Photograph_log/Created_By", created.get(1));
-    setFieldValue("Photograph_log/Photograph_log/Creation_Date", created.get(0));
+    showTabGroup("Photograph_log", archent_id, new FetchCallback() {
+        onFetch(result) {
+            photolog_id = archent_id;
+            fetchOne("select datetime(aenttimestamp, 'localtime'), fname || ' ' || lname from archentity join user using (userid) where uuid = "+photolog_id+" group by uuid having min(aenttimestamp);",
+            new FetchCallback() {
+                onFetch(result) {
+                    setFieldValue("Photograph_log/Photograph_log/Created_By", result.get(1));
+                    setFieldValue("Photograph_log/Photograph_log/Creation_Date", result.get(0));
+                    saveTabGroup("Photograph_log", photolog_id, null, null, new SaveCallback() {
+                        onSave(uuid, newRecord) {
+                            photolog_id = uuid;
+                        }
+                    }, true);
+                }
+            });
+        }
+    });
 }
 
-savePhotolog(String callback) {
+activateAutoSavePhotolog() {
+    if(!isNull(photolog_id)) return;
+    if (isNull(getFieldValue("Photograph_log/Photograph_log/Photograph_reference_ID"))) return;
+    saveTabGroup("Photograph_log", photolog_id, null, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            photolog_id = uuid;
+            if(newRecord) {
+                saveEntitiesToRel("TrenchPhotographLog", trench_id, photolog_id);    
+            }
+            saveTabGroup("Photograph_log", photolog_id, null, null, new SaveCallback() {
+                onSave(uuid, newRecord) {
+                    photolog_id = uuid;
+                }
+            }, true);
+        }
+    });
+}
+
+savePhotolog(Callable callback) {
     if (isNull(getFieldValue("Photograph_log/Photograph_log/Photograph_reference_ID"))) {
         showWarning("Validation Error", "Cannot save Photo log without Photograph Log ID");
         return;
     }
-    if (!isNull(photolog_id)) {
-        entity = fetchArchEnt(photolog_id);
-    }
-    if(!isNull(trench_id)) {
-        saveTabGroup("Photograph_log", photolog_id, null, null, "photolog_id = getLastSavedRecordId();saveEntitiesToRel(\"TrenchPhotographLog\", trench_id, photolog_id);" + callback);    
-    } else {
-        saveTabGroup("Photograph_log", photolog_id, null, null, "photolog_id = getLastSavedRecordId();" + callback);
-    }
+    saveTabGroup("Photograph_log", photolog_id, null, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            photolog_id = uuid;
+            if(newRecord) {
+                saveEntitiesToRel("TrenchPhotographLog", trench_id, photolog_id);    
+            }
+            callback.call();
+        }
+    });
     
 }
 
-closePhotoLog() {
-    cancelTabGroup("Photograph_log", false);
-    showTab("Trench/PhotoLog");
+saveAndNewPhotolog() {
+    savePhotolog(new Callable() {
+        call() {
+            newPhotolog();
+        }
+    });
+}
+
+saveAndClosePhotolog() {
+    savePhotolog(new Callable() {
+        call() {
+            cancelTabGroup("Photograph_log", false);
+            showTab("Trench/PhotoLog");
+        }
+    });
 }
 
 deletePhotolog(){
@@ -532,9 +972,35 @@ reallyDeletePhotolog(){
     showTab("Trench/PhotoLog");
 }
 
+addPhotologNavigation() {
+    removeNavigationButton("save");
+    removeNavigationButton("delete");
+
+    addNavigationButton("save", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save {Photograph_Log}";
+        }
+        actionOn() {
+            savePhotolog(null);
+        }
+    }, "success");
+
+    addNavigationButton("delete", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Delete {Photograph_Log}";
+        }
+        actionOn() {
+            deletePhotolog();
+        }
+    }, "danger");
+}
+
 /*** Note Stuff ***/
-onEvent("Notes/Notes/New", "delayclick", "saveNote(\"newNote();\")");
-onEvent("Notes/Notes/Close", "delayclick", "saveNote(\"closeNote();\")");
+onEvent("Notes", "show", "addNoteNavigation();");
+onFocus("Notes/Notes/Note_Label", null, "activateAutoSaveNote();");
+
+onEvent("Notes/Notes/New", "delayclick", "saveAndNewNote();");
+onEvent("Notes/Notes/Close", "delayclick", "saveAndCloseNote();");
 onEvent("Notes/Notes/Delete", "delayclick", "deleteNote()");
 
 String note_id;
@@ -542,11 +1008,14 @@ String note_id;
 newNote(){
     note_id = null;
     newTabGroup("Notes");
-    date = fetchOne("select datetime('now', 'localtime');");
-    setFieldValue("Notes/Notes/Creation_Date", date.get(0));
     setFieldValue("Notes/Notes/Created_By", username);
     setFieldValue("Notes/Notes/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
     setFieldValue("Notes/Notes/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
+    fetchOne("select datetime('now', 'localtime');", new FetchCallback() {
+        onFetch(result) {
+            setFieldValue("Notes/Notes/Creation_Date", result.get(0));
+        }    
+    });
 }
 
 loadNote() {
@@ -560,32 +1029,75 @@ loadNoteFrom(archent_id) {
         showToast("No record selected");
         return;
     }
+    showTabGroup("Notes", note_id, new FetchCallback() {
+        onFetch(result) {
+            fetchOne("select datetime(aenttimestamp, 'localtime'), fname || ' ' || lname from archentity join user using (userid) where uuid = "+note_id+" group by uuid having min(aenttimestamp)",
+                new FetchCallback() {
+                    onFetch(result) {
+                        setFieldValue("Notes/Notes/Created_By", created.get(1));
+                        setFieldValue("Notes/Notes/Creation_Date", created.get(0));
+                        saveTabGroup("Notes", note_id, null, null, new SaveCallback() {
+                            onSave(uuid, newRecord) {
+                                note_id = uuid;
+                            } 
+                        }, true);
+                    }
+                });
+        }
+    });
     
-    showTabGroup("Notes", note_id);
-    Object created = fetchOne("select datetime(aenttimestamp, 'localtime'), fname || ' ' || lname from archentity join user using (userid) where uuid = "+note_id+" group by uuid having min(aenttimestamp)");
-    setFieldValue("Notes/Notes/Created_By", created.get(1));
-    setFieldValue("Notes/Notes/Creation_Date", created.get(0));
 }
 
-saveNote(String callback) {
+activateAutoSaveNote() {
+    if(!isNull(note_id)) return;
+    if (isNull(getFieldValue("Notes/Notes/Note_Label"))) return;
+    saveTabGroup("Notes", note_id, null, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            note_id = uuid;
+            if(newRecord) {
+                saveEntitiesToRel("TrenchNote", trench_id, note_id);    
+            }
+            saveTabGroup("Notes", note_id, null, null, new SaveCallback() {
+                onSave(uuid, newRecord) {
+                    note_id = uuid;
+                }
+            }, true);
+        }
+    });
+}
+
+saveNote(Callable callback) {
     if (isNull(getFieldValue("Notes/Notes/Note_Label"))) {
         showWarning("Validation Error", "Cannot save Note without Note Label");
         return;
     }
-    if (!isNull(note_id)) {
-        entity = fetchArchEnt(note_id);
-    }
-    if(!isNull(trench_id)) {
-        saveTabGroup("Notes", note_id, null, null, "note_id = getLastSavedRecordId();saveEntitiesToRel(\"TrenchNote\", trench_id, note_id);" + callback);    
-    } else {
-        saveTabGroup("Notes", note_id, null, null, "note_id = getLastSavedRecordId();" + callback);
-    }
+    saveTabGroup("Notes", note_id, null, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            note_id = uuid;
+            if(newRecord) {
+                saveEntitiesToRel("TrenchNote", trench_id, note_id);
+            }
+            callback.call();
+        }
+    });    
     
 }
 
-closeNote() {
-    cancelTabGroup("Notes", false);
-    showTab("Trench/Notes");
+saveAndNewNote() {
+    saveNote(new Callable() {
+        call() {
+            newNote();
+        }
+    });
+}
+
+saveAndCloseNote() {
+    saveNote(new Callable() {
+        call() {
+            cancelTabGroup("Notes", false);
+            showTab("Trench/Notes");        
+        }
+    });
 }
 
 deleteNote(){
@@ -603,36 +1115,111 @@ reallyDeleteNote(){
     showTab("Trench/Notes");
 }
 
+addNoteNavigation() {
+    removeNavigationButton("save");
+    removeNavigationButton("delete");
+
+    addNavigationButton("save", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save {Note}";
+        }
+        actionOn() {
+            saveNote(null);
+        }
+    }, "success");
+
+    addNavigationButton("delete", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Delete {Note}";
+        }
+        actionOn() {
+            deleteNote();
+        }
+    }, "danger");
+}
+
 /*** MISC ***/
 
-saveEntitiesToRel(type, entity1, entity2) {
+saveEntitiesToRel(String type, String entity1, String entity2) {
     if (isNull(entity1) || isNull(entity2)) return;
-    
-    rel_id = saveRel(null, type, null, null);
-    addReln(entity1, rel_id, null);
-    addReln(entity2, rel_id, null);
+    saveRel(null, type, null, null, new SaveCallback() {
+        onSave(rel_id, newRecord) {
+            addReln(entity1, rel_id, null);
+            addReln(entity2, rel_id, null);
+        }
+    });
 }
 
-saveEntitiesToHierRel(type, entity1, entity2, e1verb, e2verb) {
+saveEntitiesToRel(String type, String entity1, String entity2, Callable callback) {
     if (isNull(entity1) || isNull(entity2)) return;
-    
-    rel_id = saveRel(null, type, null, null);
-    addReln(entity1, rel_id, e1verb);
-    addReln(entity2, rel_id, e2verb);
+    saveRel(null, type, null, null, new SaveCallback() {
+        onSave(rel_id, newRecord) {
+            addReln(entity1, rel_id, null);
+            addReln(entity2, rel_id, null);
+            callback.call();
+        }
+    });
 }
 
-makeVocab(String attrib) {
-    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' ");
-    return a;
+makeVocab(String type, String path, String attrib){
+    fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' order by vocabcountorder",
+        new FetchCallback() {
+            onFetch(result) {
+                if(type.equals("CheckBoxGroup")) {
+                    populateCheckBoxGroup(path, result);
+                } else if(type.equals("DropDown")) {
+                    populateDropDown(path, result);
+                } else if(type.equals("RadioGroup")) {
+                    populateRadioGroup(path, result);
+                } else if(type.equals("List")) {
+                    populateList(path, result);
+                }
+            }
+        });
 }
 
-getVocabName(String vocabid) {
-    Object a = fetchOne("select vocabName from vocabulary where vocabid = '"+ vocabid +"';");
-    return a.get(0);
+matchVocab(String path, String vocabName, Callable callbackIfTrue, Callable callbackIfFalse){
+    fetchOne("select vocabname from vocabulary where vocabname = '" + vocabName + "' and vocabid = '" + getFieldValue(path) + "';",
+        new FetchCallback() {
+            onFetch(result) {
+                if (!isNull(result)){
+                    if(callbackIfTrue != null) callbackIfTrue.call();
+                } else {
+                    if(callbackIfFalse != null) callbackIfFalse.call();
+                }
+            }
+        });
 }
 
-makePictureGallery(String attrib) {
-    fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabname;");
+matchVocabID(String vocabid, String vocabName, Callable callbackIfTrue, Callable callbackIfFalse){
+    fetchOne("select vocabname from vocabulary where vocabname = '" + vocabName + "' and vocabid = '" + vocabid + "';",
+        new FetchCallback() {
+            onFetch(result) {
+                if (!isNull(result)){
+                    if(callbackIfTrue != null) callbackIfTrue.call();
+                } else {
+                    if(callbackIfFalse != null) callbackIfFalse.call();
+                }
+            }
+        });
+}
+
+setVocab(String path, String attribName, String vocabName){
+    fetchOne("select vocabid from vocabulary join attributekey using (attributeid) where attributeName = '" + attribName + "' and vocabname = '" + vocabName + "';",
+        new FetchCallback() {
+            onFetch(result) {
+                setFieldValue(path, result.get(0));
+            }
+        });
+}
+
+makePictureGallery(String path, String attrib) {
+    fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabcountorder;",
+        new FetchCallback() {
+            onFetch(result) {
+                populatePictureGallery(path, result);
+            }
+        });
 }
 
 doNotDelete() {
@@ -666,54 +1253,60 @@ checkProjection();
 
 /*** USER ***/
 
-getDefaultUsersList() {
-    users = fetchAll("select userid, fname ||' ' || lname from user");
-    return users;
+loadUsers() {
+    fetchAll("select userid, fname || ' ' || lname from user", new FetchCallback() {
+        onFetch(result) {
+            populateList("user/usertab/users", result);
+        }
+    });
 }
 
-populateListForUsers(){
-    populateList("user/usertab/users", getDefaultUsersList());
-}
-
-populateListForUsers();
+loadUsers();
 
 String username = "";
 String device = "";
 
 login() {
-    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
-    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
-    userid = userResult.get(0);
-    setUser(user);
-    username = userResult.get(1) + " " + userResult.get(2);
-    showTabGroup("control");
+    fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+        onFetch(result) {
+            user = new User(result.get(0),result.get(1),result.get(2),result.get(3));
+            setUser(user);
+            username = result.get(1) + " " + result.get(2);
+            showTabGroup("control");
+        }
+    });
 }
 
 onEvent("user/usertab/users", "click", "login()");
 
 /*** SYNC ***/
 
-String intExt;
-int clicks = 0;
+onEvent("control/Control/startsync", "click", "startSync()");
+onEvent("control/Control/stopsync", "click", "stopSync()");
+onEvent("control/Control/connectExternalGPS", "click", "stopGPSLogic();startExternalGPS();updateTrackStatus();");
+onEvent("control/Control/connectInternalGPS", "click", "stopGPSLogic();startInternalGPS();updateTrackStatus();");
+onEvent("control/Control/stopGPS", "click", "stopGPSLogic();updateTrackStatus();");
+
+onEvent("control/Control", "show", "updateTrackStatus()");
 
 updateTrackStatus(){
     String gpsStatus = "";
-    if(!isNull(intExt)){
-        gpsStatus += "Currently connected to " + intExt + " GPS.";
+    if(isInternalGPSOn() || isInternalGPSOn()) {
+        if(isInternalGPSOn()) gpsStatus += "Currently connected to Internal GPS.";
+        else gpsStatus += "Currently connected to External GPS.";
         gpsStatus += "\nCurrent GPS Estimated Accuracy: "+ getGPSEstimatedAccuracy();
     } else {
         gpsStatus += "GPS not initialized.";
     }
-
     setFieldValue("control/Control/GPSStatus", gpsStatus);
 }
 
-onEvent("control/Control/startsync", "click", "startSync()");
-onEvent("control/Control/stopsync", "click", "stopSync()");
-onEvent("control/Control/connectExternalGPS", "click", "startExternalGPS(); if(clicks < 1) intExt = \"External\"; clicks++; updateTrackStatus();");
-onEvent("control/Control/connectInternalGPS", "click", "startInternalGPS(); if(clicks < 1) intExt = \"Internal\"; clicks++; updateTrackStatus();");
+stopGPSLogic() {
+    if(!isInternalGPSOn() && !isExternalGPSOn()) {
+        stopGPS();
+    }
+}
 
-onEvent("control/Control", "show", "updateTrackStatus()");
 
 setSyncMinInterval(10.0f);
 setSyncMaxInterval(20.0f);
