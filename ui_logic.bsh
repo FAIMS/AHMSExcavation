@@ -1054,8 +1054,8 @@ loadNoteFrom(archent_id) {
             fetchOne("select datetime(aenttimestamp, 'localtime'), fname || ' ' || lname from archentity join user using (userid) where uuid = "+note_id+" group by uuid having min(aenttimestamp)",
                 new FetchCallback() {
                     onFetch(result) {
-                        setFieldValue("Notes/Notes/Created_By", created.get(1));
-                        setFieldValue("Notes/Notes/Creation_Date", created.get(0));
+                        setFieldValue("Notes/Notes/Created_By", result.get(1));
+                        setFieldValue("Notes/Notes/Creation_Date", result.get(0));
                         saveTabGroup("Notes", note_id, null, null, new SaveCallback() {
                             onSave(uuid, newRecord) {
                                 note_id = uuid;
