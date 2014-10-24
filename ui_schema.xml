@@ -232,9 +232,9 @@
     </group>
     <group ref="user">
       <label>{User_List}</label>
-      <group ref="usertab" faims_scrollable="false">
+      <group ref="usertab">
         <label>{User_List}</label>
-        <select1 appearance="compact" ref="users">
+        <select1 appearance="compact" ref="users" faims_style_class="user-list">
           <label>{Users}:</label>
           <item>
             <label>placeholder</label>
@@ -245,15 +245,15 @@
     </group>
     <group ref="control">
       <label>{Control}</label>
-      <group ref="Excavation_Data" faims_scrollable="false">
+      <group ref="Excavation_Data">
         <label>{Excavation_Data}</label>
         <input faims_certainty="false" faims_read_only="false" ref="Job_Name">
           <label>{Job_Name}</label>
         </input>
-        <trigger ref="newTrench">
+        <trigger ref="newTrench" faims_style_class="faims-blue">
           <label>New {Trench}</label>
         </trigger>
-        <select1 appearance="compact" faims_annotation="false" faims_certainty="false" ref="TrenchList">
+        <select1 appearance="compact" faims_annotation="false" faims_certainty="false" ref="TrenchList" faims_style_class="trench-list">
           <label>{TapTrenchID}</label>
           <item>
             <label>placeholder</label>
@@ -261,9 +261,9 @@
           </item>
         </select1>
       </group>
-      <group ref="Units" faims_scrollable="false">
+      <group ref="Units">
         <label>{Units}</label>
-        <select1 appearance="compact" faims_annotation="false" faims_certainty="false" ref="UnitList">
+        <select1 appearance="compact" faims_annotation="false" faims_certainty="false" ref="UnitList" faims_style_class="user_list">
           <label>{TapUnitID}</label>
           <item>
             <label>placeholder</label>
@@ -288,7 +288,7 @@
         <trigger ref="stopsync">
           <label>{Stop_Syncing}</label>
         </trigger>
-        <input ref="GPSStatus" faims_certainty="false" faims_annotation="false" faims_read_only="true">
+        <input ref="GPSStatus" faims_certainty="false" faims_annotation="false" faims_read_only="true" faims_style_class="gps-status">
           <label>{GPS_Status}</label>
         </input>
       </group>
@@ -367,7 +367,7 @@
             <value>placeholder</value>
           </item>
         </select>
-        <trigger ref="Fill_Slope_Details">
+        <trigger ref="Fill_Slope_Details" faims_style_class="faims-blue">
           <label>{Fill_Slope_Details}</label>
         </trigger>
         <select1 ref="Geomorphic_Context" faims_attribute_name="Geomorphic Context" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
@@ -393,7 +393,7 @@
         <input ref="Samples_Details" faims_attribute_name="Samples Details" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Samples_Details}</label>
         </input>
-        <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+        <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false"  faims_style_class="faims-blue">
           <label>{Photos}</label>
           <item>
             <label>placeholder</label>
@@ -403,23 +403,23 @@
         <trigger ref="Take_Photo">
           <label>{Take_Photo}</label>
         </trigger>
-        <select type="file" ref="Sketches" faims_attribute_name="Sketches" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
+        <select type="file" ref="Sketches" faims_attribute_name="Sketches" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false" faims_style_class="faims-blue">
           <label>{Sketches}</label>
           <item>
             <label>placeholder</label>
             <value>placeholder</value>
           </item>
         </select>
-        <trigger ref="Attach_Sketches">
+        <trigger ref="Attach_Sketches" faims_style_class="faims-blue">
           <label>{Attach_Sketches}</label>
         </trigger>
-        <trigger ref="View_Attached">
+        <trigger ref="View_Attached" faims_style_class="faims-blue">
           <label>{View_Attached}</label>
         </trigger>
-        <trigger ref="Update_And_New">
+        <trigger ref="Update_And_New" faims_style_class="faims-success">
           <label>{Save_And_New_Trench}</label>
         </trigger>
-        <trigger ref="Delete">
+        <trigger ref="Delete" faims_style_class="faims-danger">
           <label>{Delete_Trench}</label>
         </trigger>
       </group>
@@ -443,12 +443,12 @@
           </item>
         </select1>
       </group>
-      <group ref="Units" faims_scrollable="false">
+      <group ref="Units">
         <label>{Units}</label>
-        <trigger ref="New_Unit">
+        <trigger ref="New_Unit" faims_style_class="faims-blue">
           <label>{New_Unit}</label>
         </trigger>
-        <select1 appearance="compact" ref="Unit_List" faims_certainty="false" faims_annotation="false">
+        <select1 appearance="compact" ref="Unit_List" faims_certainty="false" faims_annotation="false" faims_style_class="menu-list">
           <label>{Units_in_Trench}</label>
           <item>
             <label>placeholder</label>
@@ -456,12 +456,12 @@
           </item>
         </select1>
       </group>
-      <group ref="Spits" faims_scrollable="false">
+      <group ref="Spits">
         <label>{Spits}</label>
-        <trigger ref="New_Spit">
+        <trigger ref="New_Spit"  faims_style_class="faims-blue">
           <label>{New_Spit}</label>
         </trigger>
-        <select1 appearance="compact" ref="Spit_List" faims_certainty="false" faims_annotation="false">
+        <select1 appearance="compact" ref="Spit_List" faims_certainty="false" faims_annotation="false" faims_style_class="menu-list">
           <label>{Spits_in_Trench}</label>
           <item>
             <label>placeholder</label>
@@ -469,26 +469,26 @@
           </item>
         </select1>
       </group>
-      <group ref="PhotoLog" faims_scrollable="false">
-        <label>Photo Log</label>
-        <trigger ref="newPhotoLog">
-          <label>Add new Photo Log</label> 
+      <group ref="PhotoLog">
+        <label>{Photograph_Log}</label>
+        <trigger ref="newPhotoLog" faims_style_class="faims-blue">
+          <label>New {Photograph_Log}</label> 
         </trigger>
-        <select1 appearance="compact" ref="ListPhotoLog" faims_certainty="false" faims_annotation="false">
-          <label>List of Photo Logs</label>
+        <select1 appearance="compact" ref="ListPhotoLog" faims_certainty="false" faims_annotation="false" faims_style_class="menu-list">
+          <label>List of {Photograph_Log}s</label>
           <item>
             <label>placeholder</label>
             <value>placeholder</value>
           </item>
         </select1>
       </group>
-      <group ref="Notes" faims_scrollable="false">
-        <label>Notes</label>
-        <trigger ref="newNote">
-          <label>Add new Note</label> 
+      <group ref="Notes">
+        <label>{Notes}</label>
+        <trigger ref="newNote" faims_style_class="faims-blue">
+          <label>New {Note}</label> 
         </trigger>
-        <select1 appearance="compact" ref="ListNotes" faims_certainty="false" faims_annotation="false">
-          <label>List of Notes</label>
+        <select1 appearance="compact" ref="ListNotes" faims_certainty="false" faims_annotation="false" faims_style_class="menu-list">
+          <label>List of {Notes}</label>
           <item>
             <label>placeholder</label>
             <value>placeholder</value>
@@ -512,7 +512,7 @@
         <input ref="Unit_ID" faims_attribute_name="Unit ID" faims_attribute_type="measure" faims_certainty="false" faims_annotation="false" faims_read_only="false" faims_style_class="required">
           <label>{Unit_ID}</label>
         </input>
-        <input ref="Horizon" faims_attribute_name="Horizon" faims_attribute_type="measure" faims_certainty="false" faims_annotation="true" faims_read_only="false">
+        <input ref="Horizon" faims_attribute_name="Horizon" faims_attribute_type="measure" faims_certainty="false" faims_annotation="true" faims_read_only="false" faims_style_class="required">
           <label>{Horizon}</label>
         </input>
         <input ref="Depth" faims_attribute_name="Depth" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
@@ -566,7 +566,7 @@
             <value>placeholder</value>
           </item>
         </select>
-        <trigger ref="Fill_Grass_Roots_Details">
+        <trigger ref="Fill_Grass_Roots_Details"  faims_style_class="faims-blue">
           <label>{Fill_Grass_Roots_Details}</label>
         </trigger>
         <select ref="Disturbance" faims_attribute_name="Disturbance" faims_attribute_type="vocab" faims_certainty="true" faims_annotation="true" faims_read_only="false">
@@ -586,13 +586,13 @@
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Notes}</label>
         </input>  
-        <trigger ref="Update_And_New">
+        <trigger ref="Update_And_New" faims_style_class="faims-success">
           <label>{Save_And_New_Unit}</label>
         </trigger>
-        <trigger ref="Update_And_Close">
+        <trigger ref="Update_And_Close" faims_style_class="faims-success">
           <label>{Save_And_Close_Unit}</label>
         </trigger>
-        <trigger ref="Delete">
+        <trigger ref="Delete" faims_style_class="faims-danger">
           <label>{Delete_Unit}</label>
         </trigger>
       </group>
@@ -641,13 +641,13 @@
         <trigger ref="View_Attached">
           <label>{View_Attached}</label>
         </trigger>
-        <trigger ref="Update_And_New">
+        <trigger ref="Update_And_New" faims_style_class="faims-success">
           <label>{Save_And_New_Unit}</label>
         </trigger>
-        <trigger ref="Update_And_Close">
+        <trigger ref="Update_And_Close" faims_style_class="faims-success">
           <label>{Save_And_Close_Unit}</label>
         </trigger>
-        <trigger ref="Delete">
+        <trigger ref="Delete" faims_style_class="faims-danger">
           <label>{Delete_Unit}</label>
         </trigger>
       </group>
@@ -680,13 +680,13 @@
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Notes}</label>
         </input>       
-        <trigger ref="Update_And_New">
+        <trigger ref="Update_And_New" faims_style_class="faims-success">
           <label>{Save_And_New_Spit}</label>
         </trigger>
-        <trigger ref="Update_And_Close">
+        <trigger ref="Update_And_Close" faims_style_class="faims-success">
           <label>{Save_And_Close_Spit}</label>
         </trigger>
-        <trigger ref="Delete">
+        <trigger ref="Delete" faims_style_class="faims-danger">
           <label>{Delete_Spit}</label>
         </trigger>
       </group>
@@ -716,13 +716,13 @@
         <input ref="Scene_type" faims_attribute_name="Scene type" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Description}</label>
         </input>
-        <trigger ref="New">
+        <trigger ref="New" faims_style_class="faims-success">
           <label>Save and New {Photograph_Log}</label>
         </trigger>
-        <trigger ref="Close">
+        <trigger ref="Close" faims_style_class="faims-success">
           <label>Save and Close {Photograph_Log}</label>
         </trigger>
-        <trigger ref="Delete">
+        <trigger ref="Delete" faims_style_class="faims-danger">
           <label>Delete {Photograph_Log}</label>
         </trigger>
       </group>
@@ -752,13 +752,13 @@
         <input ref="Note" faims_attribute_name="Note" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false" >
           <label>{Note}</label>
         </input>
-        <trigger ref="New">
+        <trigger ref="New" faims_style_class="faims-success">
           <label>Save and New {Note}</label>
         </trigger>
-        <trigger ref="Close">
+        <trigger ref="Close" faims_style_class="faims-success">
           <label>Save and Close {Note}</label>
         </trigger>
-        <trigger ref="Delete">
+        <trigger ref="Delete" faims_style_class="faims-danger">
           <label>Delete {Note}</label>
         </trigger>
       </group>

@@ -113,6 +113,7 @@ refreshTrenchList(){
             populateList("control/Excavation_Data/TrenchList", result);
         }
     });
+    refreshTabgroupCSS("control");
 }
 
 refreshUnitList(){
@@ -124,10 +125,11 @@ refreshUnitList(){
             populateList("control/Units/UnitList", result);
         }
     });
+    refreshTabgroupCSS("Unit");
 }
 
 /*** ARCHENT: Trench ***/
-onEvent("Trench", "show", "autosaveTrench();showSlopeTab(true);addTrenchNavigation();");
+onEvent("Trench", "show", "autosaveTrench();addTrenchNavigation();");
 
 onFocus("Trench/Trench_Info/Trench_ID", null, "activateAutoSaveTrench()");
 onEvent("Trench/Trench_Info/Update_And_New", "delayclick", "saveAndNewTrench();");
@@ -175,6 +177,8 @@ newTrench(Boolean onSaveAndNew) {
     newTabGroup("Trench");
     setFieldValue("Trench/Trench_Info/Job_Name", job_name);
     setFieldValue("Trench/Trench_Info/Author", username);
+    showTab("Trench/Slope");
+    cancelTab("Trench/Slope", false);
 }
 
 loadTrench() {
@@ -190,6 +194,7 @@ loadTrenchFrom(archentid) {
     showTabGroup("Trench", archentid, new FetchCallback() {
         onFetch(result) {
             trench_id = archentid;
+            showSlopeTab(true);
             saveTabGroup("Trench", trench_id, null, null, new SaveCallback() {
                 onSave(uuid, newRecord) {
                     trench_id = uuid;
@@ -231,12 +236,14 @@ saveTrench(Callable callback) {
         showWarning("Validation Error", "Cannot save Trench without identifiers");
         return;
     }
+    dialog = showBusy("Saving {Trench}", "Please wait.");
     saveTabGroup("Trench", trench_id, null, null, new SaveCallback() {
         onSave(uuid, newRecord) {
             trench_id = uuid;
             if(newRecord) {
                 setCounters();
             }
+            dialog.dismiss();
             callback.call();
         }
     });
@@ -246,7 +253,6 @@ saveAndNewTrench() {
     saveTrench(new Callable() {
         call() {
             newTrench(true);
-            showSlopeTab(true);
         }
     });
 }
@@ -336,29 +342,25 @@ addTrenchNavigation() {
 }
 
 showSlopeTab(Boolean onLoad) {
-    // TODO WHTF?
-    // fetchOne("select vocabid from vocabulary where vocabname = '{Slope}' join attributekey using (attributeid) where attributename = '"+attrib+"' ", new FetchCallback() {
-    //     onFetch(result) {
-    //         print(result);
-    //     }
-    // });
-    // "select vocabName from vocabulary where vocabid = '"+ vocabid +"';"
-    // callbackIfTrue = new Callable() {
-
-    // }
-    // for(vocabid : getFieldValue("Trench/Trench_Info/Landform_Element")) {
-    //     if(getVocabName(vocabid.getName()).equals("{Slope}")) {
-    //         showTab("Trench/Slope");
-    //         return;
-    //     }
-    // }
-    // if(!onLoad) {
-    //     showToast("Slope was not selected in Landform Element");
-    // } else {
-    //     showTab("Trench/Slope");
-    //     cancelTab("Trench/Slope", false);
-    // }
-    return;
+    fetchOne("select vocabid from vocabulary join attributekey using (attributeid) where attributename = 'Landform Element' and vocabname = '{Slope}';", new FetchCallback() {
+        onFetch(result) {
+            for(vocabid : getFieldValue("Trench/Trench_Info/Landform_Element")) {
+                if(vocabid.getName().equals(result.get(0))) {
+                    showTab("Trench/Slope");
+                    if(onLoad) {
+                        showTab("Trench/Trench_Info");
+                    }
+                    return;
+                }
+                if(!onLoad) {
+                    showToast("Slope was not selected in Landform Element");
+                } else {
+                    showTab("Trench/Slope");
+                    cancelTab("Trench/Slope", false);
+                }
+            }
+        }
+    });
 }
 
 refreshRelatedUnits() {
@@ -386,6 +388,7 @@ refreshRelatedUnits() {
     } else {
         populateList("Trench/Units/Unit_List", new ArrayList());
     }
+    refreshTabgroupCSS("Trench");
     
 }
 
@@ -414,6 +417,7 @@ refreshRelatedSpits() {
     } else {
         populateList("Trench/Spits/Spit_List", new ArrayList());
     }
+    refreshTabgroupCSS("Trench");
 }
 
 loadRelatedPhotologs() {
@@ -441,6 +445,7 @@ loadRelatedPhotologs() {
     } else {
         populateList("Trench/PhotoLog/ListPhotoLog",  new ArrayList());
     }
+    refreshTabgroupCSS("Trench");
 }
 
 loadRelatedNotes() {
@@ -468,10 +473,11 @@ loadRelatedNotes() {
     } else {
         populateList("Trench/Notes/ListNotes", new ArrayList());
     }
+    refreshTabgroupCSS("Trench");
 }
 
 /*** ARCHENT: Unit ***/
-onEvent("Unit", "show", "showGrassRootsTab(true);addUnitNavigation();");
+onEvent("Unit", "show", "addUnitNavigation();");
 
 onFocus("Unit/Soil/Unit_ID", null, "activateAutoSaveUnit();");
 onFocus("Unit/Soil/Horizon", null, "activateAutoSaveUnit();");
@@ -504,6 +510,8 @@ newUnit() {
     setFieldValue("Unit/Soil/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
     setFieldValue("Unit/Soil/Author", username);
     autoNumUnit();
+    showTab("Unit/Grass_Roots");
+    cancelTab("Unit/Grass_Roots", false);
 }
 
 loadUnit() {
@@ -519,6 +527,7 @@ loadUnitFrom(archentid) {
     showTabGroup("Unit", unit_id, new FetchCallback() {
         onFetch(result) {
             unit_id = archentid;
+            showGrassRootsTab(true);
             saveTabGroup("Unit", unit_id, null, null, new SaveCallback() {
                 onSave(uuid, newRecord) {
                     unit_id = uuid;
@@ -551,12 +560,14 @@ saveUnit(Callable callback) {
         showWarning("Validation Error", "Cannot save Unit without ID or Horizon");
         return;
     }
+    dialog = showBusy("Saving {Unit}", "Please wait.");
     saveTabGroup("Unit", unit_id, null, null, new SaveCallback() {
         onSave(uuid, newRecord) {
             unit_id = uuid;
             if(newRecord) {
                 saveEntitiesToRel("TrenchUnit", trench_id, unit_id);
             }
+            dialog.dismiss();
             updateUnitCounter(callback);
         }
     });
@@ -566,7 +577,6 @@ saveAndNewUnit() {
     saveUnit(new Callable() {
         call() {
             newUnit();
-            showGrassRootsTab(true);
         }
     });
 }
@@ -681,19 +691,25 @@ autoNumUnit() {
 }
 
 showGrassRootsTab(Boolean onLoad) {
-    // for(vocabid : getFieldValue("Unit/Soil/Inclusions")) {
-    //     if(getVocabName(vocabid.getName()).equals("{Grass_roots}")) {
-    //         showTab("Unit/Grass_Roots");
-    //         return;
-    //     }
-    // }
-    // if(!onLoad) {
-    //     showToast("Grass Roots was not selected in Inclusions");
-    // } else {
-    //     showTab("Unit/Grass_Roots");
-    //     cancelTab("Unit/Grass_Roots", false);
-    // }
-    return;
+    fetchOne("select vocabid from vocabulary join attributekey using (attributeid) where attributename = 'Inclusions' and vocabname = '{Grass_roots}';", new FetchCallback() {
+        onFetch(result) {
+            for(vocabid : getFieldValue("Unit/Soil/Inclusions")) {
+                if(vocabid.getName().equals(result.get(0))) {
+                    showTab("Unit/Grass_Roots");
+                    if(onLoad) {
+                        showTab("Unit/Soil");
+                    }
+                    return;
+                }
+                if(!onLoad) {
+                    showToast("Grass Roots was not selected in Inclusions");
+                } else {
+                    showTab("Unit/Grass_Roots");
+                    cancelTab("Unit/Grass_Roots", false);
+                }
+            }
+        }
+    });
 }
 
 /*** ARCHENT: Spit ***/
@@ -742,12 +758,14 @@ saveSpit(Callable callback) {
         showWarning("Validation Error", "Cannot save Spit without ID");
         return;
     }
+    dialog = showBusy("Saving {Spit}", "Please wait.");
     saveTabGroup("Spit", spit_id, null, null, new SaveCallback() {
         onSave(uuid, newRecord) {
             spit_id = uuid;
             if(newRecord) {
                 saveEntitiesToRel("TrenchSpit", trench_id, spit_id);
             }
+            dialog.dismiss();
             updateSpitCounter(callback);
         }
     });
@@ -928,12 +946,14 @@ savePhotolog(Callable callback) {
         showWarning("Validation Error", "Cannot save Photo log without Photograph Log ID");
         return;
     }
+    dialog = showBusy("Saving {Photolog}", "Please wait.");
     saveTabGroup("Photograph_log", photolog_id, null, null, new SaveCallback() {
         onSave(uuid, newRecord) {
             photolog_id = uuid;
             if(newRecord) {
                 saveEntitiesToRel("TrenchPhotographLog", trench_id, photolog_id);    
             }
+            dialog.dismiss();
             callback.call();
         }
     });
@@ -1071,12 +1091,14 @@ saveNote(Callable callback) {
         showWarning("Validation Error", "Cannot save Note without Note Label");
         return;
     }
+    dialog = showBusy("Saving {Note}", "Please wait.");
     saveTabGroup("Notes", note_id, null, null, new SaveCallback() {
         onSave(uuid, newRecord) {
             note_id = uuid;
             if(newRecord) {
                 saveEntitiesToRel("TrenchNote", trench_id, note_id);
             }
+            dialog.dismiss();
             callback.call();
         }
     });    
