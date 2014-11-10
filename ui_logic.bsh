@@ -272,7 +272,7 @@ saveTrench(Callable callback) {
                 setCounters();
             }
             dialog.dismiss();
-            callback.call();
+            if(callback != null) callback.call();
         }
 
         onError(message) {
@@ -745,6 +745,7 @@ addUnitNavigation() {
             saveUnit(new Callable() {
                 call() {
                     unit_id = null;
+                    autoNumUnit();
                 }
             });
         }
@@ -980,6 +981,7 @@ addSpitNavigation() {
             saveSpit(new Callable() {
                 call() {
                     spit_id = null;
+                    autoNumSpit();
                 }
             });
         }
@@ -1151,7 +1153,7 @@ savePhotolog(Callable callback) {
                 saveEntitiesToRel("TrenchPhotographLog", trench_id, photolog_id);    
             }
             dialog.dismiss();
-            callback.call();
+            if(callback != null) callback.call();
         }
 
         onError(message) {
@@ -1336,7 +1338,7 @@ saveNote(Callable callback) {
                 saveEntitiesToRel("TrenchNote", trench_id, note_id);
             }
             dialog.dismiss();
-            callback.call();
+            if(callback != null) callback.call();
         }
 
         onError(message) {
