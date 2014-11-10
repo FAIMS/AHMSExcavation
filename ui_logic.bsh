@@ -173,8 +173,8 @@ newTrench(Boolean onSaveAndNew) {
     } else {
         job_name = getFieldValue("Trench/Trench_Info/Job_Name");
     }
-    trench_id = null;
     newTabGroup("Trench");
+    trench_id = null;
     setFieldValue("Trench/Trench_Info/Job_Name", job_name);
     setFieldValue("Trench/Trench_Info/Author", username);
     showTab("Trench/Slope");
@@ -504,8 +504,8 @@ newUnit() {
         goBack();
         return;
     }
-    unit_id = null;
     newTabGroup("Unit");
+    unit_id = null;
     setFieldValue("Unit/Soil/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
     setFieldValue("Unit/Soil/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
     setFieldValue("Unit/Soil/Author", username);
@@ -722,8 +722,8 @@ onEvent("Spit/Spit_Info/Delete", "delayclick", "deleteSpit()");
 String spit_id = null;
 
 newSpit() {
-    spit_id = null;
     newTabGroup("Spit");
+    spit_id = null;
     setFieldValue("Spit/Spit_Info/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
     setFieldValue("Spit/Spit_Info/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
     setFieldValue("Spit/Spit_Info/Author", username);
@@ -881,9 +881,9 @@ onEvent("Photograph_log/Photograph_log/Delete", "delayclick", "deletePhotolog();
 
 String photolog_id;
 
-newPhotolog(){
-    photolog_id = null;
+newPhotolog() {
     newTabGroup("Photograph_log");
+    photolog_id = null;
     setFieldValue("Photograph_log/Photograph_log/Created_By", username);
     setFieldValue("Photograph_log/Photograph_log/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
     setFieldValue("Photograph_log/Photograph_log/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
@@ -1025,9 +1025,9 @@ onEvent("Notes/Notes/Delete", "delayclick", "deleteNote()");
 
 String note_id;
 
-newNote(){
-    note_id = null;
+newNote() {
     newTabGroup("Notes");
+    note_id = null;
     setFieldValue("Notes/Notes/Created_By", username);
     setFieldValue("Notes/Notes/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
     setFieldValue("Notes/Notes/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
