@@ -36,14 +36,6 @@
             <Units>
               <UnitList/>
             </Units>
-            <Control>
-              <startsync/>
-              <stopsync/>
-              <connectInternalGPS/>
-              <connectExternalGPS/>
-              <stopGPS/>
-              <GPSStatus/>
-            </Control>
           </control>
           <Trench>
             <Trench_Info>
@@ -82,16 +74,11 @@
               <Sketches/>
               <Attach_Sketches/>
               <View_Attached/>
-              <Update/>
-              <Update_And_New/>
-              <Delete/>
             </Trench_Info>
             <Slope>
               <Slope_Degree/>
               <Slope_Detail/>
               <Slope_Detail_2/>
-              <Update/>
-              <Delete/>
             </Slope>
             <Units>
               <New_Unit/>
@@ -130,25 +117,11 @@
               <Disturbance/>
               <Artefacts/>
               <Notes/>
-              <Update_And_New/>
-              <Update_And_Close/>
-              <Delete/>
             </Soil>
             <Grass_Roots>
               <Root_Size/>
               <Root_Abundance/>
-              <Back/>
             </Grass_Roots>
-            <Add>
-              <Photos/>
-              <Take_Photo/>
-              <Sketches/>
-              <Attach_Sketches/>
-              <View_Attached/>
-              <Update_And_New/>
-              <Update_And_Close/>
-              <Delete/>
-            </Add>
           </Unit>
           <Spit>
             <Spit_Info>
@@ -160,9 +133,6 @@
               <Thickness/>
               <Artefact_Density/>
               <Notes/>
-              <Update_And_New/>
-              <Update_And_Close/>
-              <Delete/>
             </Spit_Info>
           </Spit>
           <Photograph_log>
@@ -173,12 +143,8 @@
               <Creation_Date/>
               <Photograph_reference_ID/>
               <Scene_type/>
-              <New/>
-              <Close/>
-              <Delete/>
             </Photograph_log>
           </Photograph_log>
-
           <Notes>
             <Notes>
               <Job_Name/>
@@ -186,12 +152,7 @@
               <Created_By/>
               <Creation_Date/>
               <Note_Label/>
-              <Note/>>
-              <Update/>
-              <Duplicate/>
-              <New/>
-              <Close/>
-              <Delete/>
+              <Note/>
             </Notes>
           </Notes>
         </faims>
@@ -270,27 +231,6 @@
             <value>placeholder</value>
           </item>
         </select1>
-      </group>
-      <group ref="Control">
-        <label>{Control}</label>
-        <trigger ref="connectExternalGPS">
-          <label>{ConnectExtGPS}</label>
-        </trigger>
-        <trigger ref="connectInternalGPS">
-          <label>{ConnectIntGPS}</label>
-        </trigger>
-        <trigger ref="stopGPS">
-          <label>{StopGPS}</label>
-        </trigger>
-        <trigger ref="startsync">
-          <label>{Start_Syncing}</label>
-        </trigger>
-        <trigger ref="stopsync">
-          <label>{Stop_Syncing}</label>
-        </trigger>
-        <input ref="GPSStatus" faims_certainty="false" faims_annotation="false" faims_read_only="true" faims_style_class="gps-status">
-          <label>{GPS_Status}</label>
-        </input>
       </group>
     </group>
     <group ref="Trench" faims_archent_type="Trench">
@@ -393,17 +333,17 @@
         <input ref="Samples_Details" faims_attribute_name="Samples Details" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Samples_Details}</label>
         </input>
-        <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false"  faims_style_class="faims-blue">
+        <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Photos}</label>
           <item>
             <label>placeholder</label>
             <value>placeholder</value>
           </item>
         </select>
-        <trigger ref="Take_Photo">
+        <trigger ref="Take_Photo" faims_style_class="faims-blue">
           <label>{Take_Photo}</label>
         </trigger>
-        <select type="file" ref="Sketches" faims_attribute_name="Sketches" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false" faims_style_class="faims-blue">
+        <select type="file" ref="Sketches" faims_attribute_name="Sketches" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Sketches}</label>
           <item>
             <label>placeholder</label>
@@ -415,12 +355,6 @@
         </trigger>
         <trigger ref="View_Attached" faims_style_class="faims-blue">
           <label>{View_Attached}</label>
-        </trigger>
-        <trigger ref="Update_And_New" faims_style_class="faims-success">
-          <label>{Save_And_New_Trench}</label>
-        </trigger>
-        <trigger ref="Delete" faims_style_class="faims-danger">
-          <label>{Delete_Trench}</label>
         </trigger>
       </group>
       <group ref="Slope" faims_hidden="true">
@@ -585,16 +519,7 @@
         </select1>
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Notes}</label>
-        </input>  
-        <trigger ref="Update_And_New" faims_style_class="faims-success">
-          <label>{Save_And_New_Unit}</label>
-        </trigger>
-        <trigger ref="Update_And_Close" faims_style_class="faims-success">
-          <label>{Save_And_Close_Unit}</label>
-        </trigger>
-        <trigger ref="Delete" faims_style_class="faims-danger">
-          <label>{Delete_Unit}</label>
-        </trigger>
+        </input>
       </group>
       <group ref="Grass_Roots" faims_hidden="true">
         <label>{Grass_Roots}</label>
@@ -612,44 +537,6 @@
             <value>placeholder</value>
           </item>
         </select1>
-        <trigger ref="Back">
-          <label>{Back}</label>
-        </trigger>
-      </group>
-      <group ref="Add" faims_hidden="true">
-        <label>{Add}</label>
-        <select type="camera" faims_sync="true" ref="Photos" faims_attribute_name="Photos" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
-          <label>{Photos}</label>
-          <item>
-            <label>placeholder</label>
-            <value>placeholder</value>
-          </item>
-        </select>
-        <trigger ref="Take_Photo">
-          <label>{Take_Photo}</label>
-        </trigger>
-        <select type="file" ref="Sketches" faims_attribute_name="Sketches" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
-          <label>{Sketches}</label>
-          <item>
-            <label>placeholder</label>
-            <value>placeholder</value>
-          </item>
-        </select>
-        <trigger ref="Attach_Sketches">
-          <label>{Attach_Sketches}</label>
-        </trigger>
-        <trigger ref="View_Attached">
-          <label>{View_Attached}</label>
-        </trigger>
-        <trigger ref="Update_And_New" faims_style_class="faims-success">
-          <label>{Save_And_New_Unit}</label>
-        </trigger>
-        <trigger ref="Update_And_Close" faims_style_class="faims-success">
-          <label>{Save_And_Close_Unit}</label>
-        </trigger>
-        <trigger ref="Delete" faims_style_class="faims-danger">
-          <label>{Delete_Unit}</label>
-        </trigger>
       </group>
     </group>
     <group ref="Spit" faims_archent_type="Spit">
@@ -679,16 +566,7 @@
         </input>
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Notes}</label>
-        </input>       
-        <trigger ref="Update_And_New" faims_style_class="faims-success">
-          <label>{Save_And_New_Spit}</label>
-        </trigger>
-        <trigger ref="Update_And_Close" faims_style_class="faims-success">
-          <label>{Save_And_Close_Spit}</label>
-        </trigger>
-        <trigger ref="Delete" faims_style_class="faims-danger">
-          <label>{Delete_Spit}</label>
-        </trigger>
+        </input>
       </group>
     </group>
 
@@ -716,15 +594,6 @@
         <input ref="Scene_type" faims_attribute_name="Scene type" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false">
           <label>{Description}</label>
         </input>
-        <trigger ref="New" faims_style_class="faims-success">
-          <label>Save and New {Photograph_Log}</label>
-        </trigger>
-        <trigger ref="Close" faims_style_class="faims-success">
-          <label>Save and Close {Photograph_Log}</label>
-        </trigger>
-        <trigger ref="Delete" faims_style_class="faims-danger">
-          <label>Delete {Photograph_Log}</label>
-        </trigger>
       </group>
     </group>
 
@@ -752,15 +621,6 @@
         <input ref="Note" faims_attribute_name="Note" faims_attribute_type="measure" faims_certainty="true" faims_annotation="true" faims_read_only="false" >
           <label>{Note}</label>
         </input>
-        <trigger ref="New" faims_style_class="faims-success">
-          <label>Save and New {Note}</label>
-        </trigger>
-        <trigger ref="Close" faims_style_class="faims-success">
-          <label>Save and Close {Note}</label>
-        </trigger>
-        <trigger ref="Delete" faims_style_class="faims-danger">
-          <label>Delete {Note}</label>
-        </trigger>
       </group>
     </group>
   </h:body>

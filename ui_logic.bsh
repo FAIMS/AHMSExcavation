@@ -99,7 +99,9 @@ onEvent("control/Units/UnitList", "click", "loadUnit()");
 setIDNull() {
     trench_id = null;
     unit_id = null;
-    removeNavigationButton("save");
+    removeNavigationButton("duplicate");
+    removeNavigationButton("save_and_new");
+    removeNavigationButton("save_and_close");
     removeNavigationButton("delete");
 }
 
@@ -111,6 +113,10 @@ refreshTrenchList(){
     "order by response;", new FetchCallback() {
         onFetch(result) {
             populateList("control/Excavation_Data/TrenchList", result);
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
     refreshTabgroupCSS("control");
@@ -124,6 +130,10 @@ refreshUnitList(){
         onFetch(result) {
             populateList("control/Units/UnitList", result);
         }
+
+        onError(message) {
+            showToast(message);
+        }
     });
     refreshTabgroupCSS("Unit");
 }
@@ -132,9 +142,6 @@ refreshUnitList(){
 onEvent("Trench", "show", "autosaveTrench();addTrenchNavigation();");
 
 onFocus("Trench/Trench_Info/Trench_ID", null, "activateAutoSaveTrench()");
-onEvent("Trench/Trench_Info/Update_And_New", "delayclick", "saveAndNewTrench();");
-
-onEvent("Trench/Trench_Info/Delete", "delayclick", "deleteTrench()");
 
 onEvent("Trench/Trench_Info/Take_GPS", "click", "fillInGPS(\"Trench/Trench_Info/\")");
 onEvent("Trench/Trench_Info/Fill_Slope_Details", "click", "showSlopeTab(false)");
@@ -173,12 +180,13 @@ newTrench(Boolean onSaveAndNew) {
     } else {
         job_name = getFieldValue("Trench/Trench_Info/Job_Name");
     }
+    onEvent("Trench", "show", "showTab(\"Trench/Slope\");cancelTab(\"Trench/Slope\", false);");
     newTabGroup("Trench");
     trench_id = null;
     setFieldValue("Trench/Trench_Info/Job_Name", job_name);
     setFieldValue("Trench/Trench_Info/Author", username);
-    showTab("Trench/Slope");
-    cancelTab("Trench/Slope", false);
+    
+    
 }
 
 loadTrench() {
@@ -199,7 +207,15 @@ loadTrenchFrom(archentid) {
                 onSave(uuid, newRecord) {
                     trench_id = uuid;
                 }
+
+                onError(message) {
+                    showToast(message);
+                }
             }, true);
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -217,7 +233,15 @@ activateAutoSaveTrench() {
                 onSave(uuid, newRecord) {
                     trench_id = uuid;
                 }
+
+                onError(message) {
+                    showToast(message);
+                }
             }, true);
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -228,12 +252,16 @@ autosaveTrench() {
         onSave(uuid, newRecord) {
             trench_id = uuid;
         }
+
+        onError(message) {
+            showToast(message);
+        }
     }, true);
 }
 
 saveTrench(Callable callback) {
     if (isNull(getFieldValue("Trench/Trench_Info/Trench_ID"))) {
-        showWarning("Validation Error", "Cannot save Trench without identifiers");
+        showWarning("Validation Error", "Cannot save Trench without a Trench ID");
         return;
     }
     dialog = showBusy("Saving {Trench}", "Please wait.");
@@ -246,13 +274,9 @@ saveTrench(Callable callback) {
             dialog.dismiss();
             callback.call();
         }
-    });
-}
 
-saveAndNewTrench() {
-    saveTrench(new Callable() {
-        call() {
-            newTrench(true);
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -319,15 +343,49 @@ loadTrenchAttributes() {
 }
 
 addTrenchNavigation() {
-    removeNavigationButton("save");
+    removeNavigationButton("duplicate");
+    removeNavigationButton("save_and_new");
+    removeNavigationButton("save_and_close");
     removeNavigationButton("delete");
 
-    addNavigationButton("save", new ActionButtonCallback() {
+    addNavigationButton("duplicate", new ActionButtonCallback() {
         actionOnLabel() {
-            "Save {Trench}";
+            "Duplicate {Trench}";
         }
         actionOn() {
-            saveTrench(null);
+            saveTrench(new Callable() {
+                call() {
+                    trench_id = null;
+                    populateCameraPictureGallery("Trench/Trench_Info/Photos", new ArrayList());
+                    populateFileList("Trench/Trench_Info/Sketches", new ArrayList());
+                }
+            });
+        }
+    }, "success");
+
+    addNavigationButton("save_and_new", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save and New {Trench}";
+        }
+        actionOn() {
+            saveTrench(new Callable() {
+                call() {
+                    newTrench(true);
+                }
+            });
+        }
+    }, "success");
+
+    addNavigationButton("save_and_close", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save and Close {Trench}";
+        }
+        actionOn() {
+            saveTrench(new Callable() {
+                call() {
+                    cancelTabGroup("Trench", false);
+                }
+            });
         }
     }, "success");
 
@@ -360,6 +418,10 @@ showSlopeTab(Boolean onLoad) {
                 }
             }
         }
+
+        onError(message) {
+            showToast(message);
+        }
     });
 }
 
@@ -383,6 +445,10 @@ refreshRelatedUnits() {
             "order by valuetimestamp desc, uuid, attributename;", new FetchCallback() {
                 onFetch(result) {
                     populateList("Trench/Units/Unit_List", result);
+                }
+
+                onError(message) {
+                    showToast(message);
                 }
             });
     } else {
@@ -413,6 +479,10 @@ refreshRelatedSpits() {
                 onFetch(result) {
                     populateList("Trench/Spits/Spit_List", result);
                 }
+
+                onError(message) {
+                    showToast(message);
+                }
             });
     } else {
         populateList("Trench/Spits/Spit_List", new ArrayList());
@@ -440,6 +510,10 @@ loadRelatedPhotologs() {
             "order by valuetimestamp desc, uuid, attributename;", new FetchCallback() {
                 onFetch(result) {
                     populateList("Trench/PhotoLog/ListPhotoLog",  result);
+                }
+
+                onError(message) {
+                    showToast(message);
                 }
             });
     } else {
@@ -469,6 +543,10 @@ loadRelatedNotes() {
                 onFetch(result) {
                     populateList("Trench/Notes/ListNotes", result);
                 }
+
+                onError(message) {
+                    showToast(message);
+                }
             });
     } else {
         populateList("Trench/Notes/ListNotes", new ArrayList());
@@ -482,19 +560,7 @@ onEvent("Unit", "show", "addUnitNavigation();");
 onFocus("Unit/Soil/Unit_ID", null, "activateAutoSaveUnit();");
 onFocus("Unit/Soil/Horizon", null, "activateAutoSaveUnit();");
 
-onEvent("Unit/Soil/Update_And_New", "delayclick", "saveAndNewUnit();");
-
-onEvent("Unit/Soil/Update_And_Close", "delayclick", "saveAndCloseUnit();");
-
-onEvent("Unit/Soil/Delete", "delayclick", "deleteUnit()");
-onEvent("Unit/Add/Delete", "delayclick", "deleteUnit()");
-
 onEvent("Unit/Soil/Fill_Grass_Roots_Details", "click", "showGrassRootsTab(false)");
-onEvent("Unit/Grass_Roots/Back", "delayclick", "grassrootsBack();");
-
-onEvent("Unit/Add/Take_Photo", "click", "attachPictureTo(\"Unit/Add/Photos\")");
-onEvent("Unit/Add/Attach_Sketches", "click", "attachFileTo(\"Unit/Add/Sketches\")");
-onEvent("Unit/Add/View_Attached", "click", "viewArchEntAttachedFiles(unit_id)");
 
 String unit_id = null;
 
@@ -504,14 +570,13 @@ newUnit() {
         goBack();
         return;
     }
+    onEvent("Unit", "show", "showTab(\"Unit/Grass_Roots\");cancelTab(\"Unit/Grass_Roots\", false);");
     newTabGroup("Unit");
     unit_id = null;
     setFieldValue("Unit/Soil/Job_Name", getFieldValue("Trench/Trench_Info/Job_Name"));
     setFieldValue("Unit/Soil/Trench_ID", getFieldValue("Trench/Trench_Info/Trench_ID"));
     setFieldValue("Unit/Soil/Author", username);
     autoNumUnit();
-    showTab("Unit/Grass_Roots");
-    cancelTab("Unit/Grass_Roots", false);
 }
 
 loadUnit() {
@@ -533,7 +598,15 @@ loadUnitFrom(archentid) {
                     unit_id = uuid;
                     updateUnitCounter(null);
                 }
+
+                onError(message) {
+                    showToast(message);
+                }
             }, true);
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -550,7 +623,15 @@ activateAutoSaveUnit() {
                     unit_id = uuid;
                     updateUnitCounter(null);
                 }
+
+                onError(message) {
+                    showToast(message);
+                }
             }, true);
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -570,30 +651,9 @@ saveUnit(Callable callback) {
             dialog.dismiss();
             updateUnitCounter(callback);
         }
-    });
-}
 
-saveAndNewUnit() {
-    saveUnit(new Callable() {
-        call() {
-            newUnit();
-        }
-    });
-}
-
-saveAndCloseUnit() {
-    saveUnit(new Callable() {
-        call() {
-            cancelTabGroup("Unit",false);
-            showTab("Trench/Units");
-        }
-    });
-}
-
-grassrootsBack() {
-    saveUnit(new Callable() {
-        call() {
-            showTab("Unit/Soil");
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -608,17 +668,29 @@ updateUnitCounter(Callable callback) {
                         onFetch(result) {
                             if(callback != null) callback.call();
                         }
+
+                        onError(message) {
+                            showToast(message);
+                        }
                     });
                 } else {
                     fetchOne("REPLACE INTO localSettings(key, value) VALUES('Unit"+ trench_id +"', "+ next_unit_id +");", new FetchCallback() {
                         onFetch(result) {
                             if(callback != null) callback.call();
                         }
+
+                        onError(message) {
+                            showToast(message);
+                        }
                     });
                 }
             } catch (NumberFormatException e) {
                 return;
             }
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -660,15 +732,48 @@ loadUnitAttributes() {
 }
 
 addUnitNavigation() {
-    removeNavigationButton("save");
+    removeNavigationButton("duplicate");
+    removeNavigationButton("save_and_new");
+    removeNavigationButton("save_and_close");
     removeNavigationButton("delete");
 
-    addNavigationButton("save", new ActionButtonCallback() {
+    addNavigationButton("duplicate", new ActionButtonCallback() {
         actionOnLabel() {
             "Save {Unit}";
         }
         actionOn() {
-            saveUnit(null);
+            saveUnit(new Callable() {
+                call() {
+                    unit_id = null;
+                }
+            });
+        }
+    }, "success");
+
+    addNavigationButton("save_and_new", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save and New {Unit}";
+        }
+        actionOn() {
+            saveUnit(new Callable() {
+                call() {
+                    newUnit();
+                }
+            });
+        }
+    }, "success");
+
+    addNavigationButton("save_and_close", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save {Unit}";
+        }
+        actionOn() {
+            saveUnit(new Callable() {
+                call() {
+                    cancelTabGroup("Unit",false);
+                    showTab("Trench/Units");
+                }
+            });
         }
     }, "success");
 
@@ -686,6 +791,14 @@ autoNumUnit() {
     fetchOne("select value from localSettings where key = 'Unit"+ trench_id +"';", new FetchCallback() {
         onFetch(result) {
             setFieldValue("Unit/Soil/Unit_ID", result.get(0));
+        }
+
+        onError(message) {
+            showToast(message);
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -709,15 +822,15 @@ showGrassRootsTab(Boolean onLoad) {
                 }
             }
         }
+
+        onError(message) {
+            showToast(message);
+        }
     });
 }
 
 /*** ARCHENT: Spit ***/
 onEvent("Spit", "show", "addSpitNavigation();");
-
-onEvent("Spit/Spit_Info/Update_And_New", "delayclick", "saveAndNewSpit();");
-onEvent("Spit/Spit_Info/Update_And_Close", "delayclick", "saveAndCloseSpit();");
-onEvent("Spit/Spit_Info/Delete", "delayclick", "deleteSpit()");
 
 String spit_id = null;
 
@@ -748,7 +861,15 @@ loadSpitFrom(archentid) {
                     spit_id = uuid;
                     updateSpitCounter(null);
                 }
+
+                onError(message) {
+                    showToast(message);
+                }
             }, true);
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -767,6 +888,10 @@ saveSpit(Callable callback) {
             }
             dialog.dismiss();
             updateSpitCounter(callback);
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -799,17 +924,29 @@ updateSpitCounter(Callable callback) {
                         onFetch(result) {
                             if(callback != null) callback.call();
                         }
+
+                        onError(message) {
+                            showToast(message);
+                        }
                     });
                 } else {
                     fetchOne("REPLACE INTO localSettings(key, value) VALUES('Spit"+ trench_id +"', "+ next_spit_id +");", new FetchCallback() {
                         onFetch(result) {
                             if(callback != null) callback.call();
                         }
+
+                        onError(message) {
+                            showToast(message);
+                        }
                     });
                 }    
             } catch(NumberFormatException e) {
                 return;
             }
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -830,15 +967,48 @@ reallyDeleteSpit() {
 }
 
 addSpitNavigation() {
-    removeNavigationButton("save");
+    removeNavigationButton("duplicate");
+    removeNavigationButton("save_and_new");
+    removeNavigationButton("save_and_close");
     removeNavigationButton("delete");
 
-    addNavigationButton("save", new ActionButtonCallback() {
+    addNavigationButton("duplicate", new ActionButtonCallback() {
         actionOnLabel() {
-            "Save {Spit}";
+            "Duplicate {Spit}";
         }
         actionOn() {
-            saveSpit(null);
+            saveSpit(new Callable() {
+                call() {
+                    spit_id = null;
+                }
+            });
+        }
+    }, "success");
+
+    addNavigationButton("save_and_new", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save and New {Spit}";
+        }
+        actionOn() {
+            saveSpit(new Callable() {
+                call() {
+                    newSpit();
+                }
+            });
+        }
+    }, "success");
+
+    addNavigationButton("save_and_close", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save and Close {Spit}";
+        }
+        actionOn() {
+            saveSpit(new Callable() {
+                call() {
+                    cancelTabGroup("Spit", false);
+                    showTab("Trench/Spits");
+                }
+            });
         }
     }, "success");
 
@@ -863,21 +1033,24 @@ autoNumSpit() {
                             spit_id = uuid;
                             updateSpitCounter(null);
                         }
+
+                        onError(message) {
+                            showToast(message);
+                        }
                     }, true);
                 }
             });
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
 
 /*** Photolog Stuff ***/
 onEvent("Photograph_log", "show", "addPhotologNavigation();");
-
 onFocus("Photograph_log/Photograph_log/Photograph_reference_ID", null, "activateAutoSavePhotolog();");
-
-onEvent("Photograph_log/Photograph_log/New", "delayclick", "saveAndNewPhotolog();");
-onEvent("Photograph_log/Photograph_log/Close", "delayclick", "saveAndClosePhotolog();");
-onEvent("Photograph_log/Photograph_log/Delete", "delayclick", "deletePhotolog();");
 
 String photolog_id;
 
@@ -890,6 +1063,10 @@ newPhotolog() {
     fetchOne("select datetime('now', 'localtime');", new FetchCallback() {
         onFetch(result) {
             setFieldValue("Photograph_log/Photograph_log/Creation_Date", result.get(0));        
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -916,9 +1093,21 @@ loadPhotologFrom(archent_id) {
                         onSave(uuid, newRecord) {
                             photolog_id = uuid;
                         }
+
+                        onError(message) {
+                            showToast(message);
+                        }
                     }, true);
                 }
+
+                onError(message) {
+                    showToast(message);
+                }
             });
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -936,7 +1125,15 @@ activateAutoSavePhotolog() {
                 onSave(uuid, newRecord) {
                     photolog_id = uuid;
                 }
+
+                onError(message) {
+                    showToast(message);
+                }
             }, true);
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -956,25 +1153,12 @@ savePhotolog(Callable callback) {
             dialog.dismiss();
             callback.call();
         }
+
+        onError(message) {
+            showToast(message);
+        }
     });
     
-}
-
-saveAndNewPhotolog() {
-    savePhotolog(new Callable() {
-        call() {
-            newPhotolog();
-        }
-    });
-}
-
-saveAndClosePhotolog() {
-    savePhotolog(new Callable() {
-        call() {
-            cancelTabGroup("Photograph_log", false);
-            showTab("Trench/PhotoLog");
-        }
-    });
 }
 
 deletePhotolog(){
@@ -993,15 +1177,48 @@ reallyDeletePhotolog(){
 }
 
 addPhotologNavigation() {
-    removeNavigationButton("save");
+    removeNavigationButton("duplicate");
+    removeNavigationButton("save_and_new");
+    removeNavigationButton("save_and_close");
     removeNavigationButton("delete");
 
-    addNavigationButton("save", new ActionButtonCallback() {
+    addNavigationButton("duplicate", new ActionButtonCallback() {
         actionOnLabel() {
-            "Save {Photograph_Log}";
+            "Duplicate {Photograph_Log}";
         }
         actionOn() {
-            savePhotolog(null);
+            savePhotolog(new Callable() {
+                call() {
+                    photolog_id = null;
+                }
+            });
+        }
+    }, "success");
+
+    addNavigationButton("save_and_new", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save and New {Photograph_Log}";
+        }
+        actionOn() {
+            savePhotolog(new Callable() {
+                call() {
+                    newPhotolog();
+                }
+            });
+        }
+    }, "success");
+
+    addNavigationButton("save_and_close", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save and Close {Photograph_Log}";
+        }
+        actionOn() {
+            savePhotolog(new Callable() {
+                call() {
+                    cancelTabGroup("Photograph_log", false);
+                    showTab("Trench/PhotoLog");
+                }
+            });
         }
     }, "success");
 
@@ -1012,16 +1229,12 @@ addPhotologNavigation() {
         actionOn() {
             deletePhotolog();
         }
-    }, "danger");
+    }, "danger");    
 }
 
 /*** Note Stuff ***/
 onEvent("Notes", "show", "addNoteNavigation();");
 onFocus("Notes/Notes/Note_Label", null, "activateAutoSaveNote();");
-
-onEvent("Notes/Notes/New", "delayclick", "saveAndNewNote();");
-onEvent("Notes/Notes/Close", "delayclick", "saveAndCloseNote();");
-onEvent("Notes/Notes/Delete", "delayclick", "deleteNote()");
 
 String note_id;
 
@@ -1034,7 +1247,11 @@ newNote() {
     fetchOne("select datetime('now', 'localtime');", new FetchCallback() {
         onFetch(result) {
             setFieldValue("Notes/Notes/Creation_Date", result.get(0));
-        }    
+        }
+
+        onError(message) {
+            showToast(message);
+        } 
     });
 }
 
@@ -1060,9 +1277,21 @@ loadNoteFrom(archent_id) {
                             onSave(uuid, newRecord) {
                                 note_id = uuid;
                             } 
+
+                            onError(message) {
+                                showToast(message);
+                            }
                         }, true);
                     }
+
+                    onError(message) {
+                        showToast(message);
+                    }
                 });
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
     
@@ -1081,7 +1310,15 @@ activateAutoSaveNote() {
                 onSave(uuid, newRecord) {
                     note_id = uuid;
                 }
+
+                onError(message) {
+                    showToast(message);
+                }
             }, true);
+        }
+
+        onError(message) {
+            showToast(message);
         }
     });
 }
@@ -1101,25 +1338,12 @@ saveNote(Callable callback) {
             dialog.dismiss();
             callback.call();
         }
+
+        onError(message) {
+            showToast(message);
+        }
     });    
     
-}
-
-saveAndNewNote() {
-    saveNote(new Callable() {
-        call() {
-            newNote();
-        }
-    });
-}
-
-saveAndCloseNote() {
-    saveNote(new Callable() {
-        call() {
-            cancelTabGroup("Notes", false);
-            showTab("Trench/Notes");        
-        }
-    });
 }
 
 deleteNote(){
@@ -1138,15 +1362,48 @@ reallyDeleteNote(){
 }
 
 addNoteNavigation() {
-    removeNavigationButton("save");
+    removeNavigationButton("duplicate");
+    removeNavigationButton("save_and_new");
+    removeNavigationButton("save_and_close");
     removeNavigationButton("delete");
 
-    addNavigationButton("save", new ActionButtonCallback() {
+    addNavigationButton("duplicate", new ActionButtonCallback() {
         actionOnLabel() {
             "Save {Note}";
         }
         actionOn() {
-            saveNote(null);
+            saveNote(new Callable() {
+                call() {
+                    note_id = null;
+                }
+            });
+        }
+    }, "success");
+
+    addNavigationButton("save_and_new", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save {Note}";
+        }
+        actionOn() {
+            saveNote(new Callable() {
+                call() {
+                    newNote();
+                }
+            });
+        }
+    }, "success");
+
+    addNavigationButton("save_and_close", new ActionButtonCallback() {
+        actionOnLabel() {
+            "Save {Note}";
+        }
+        actionOn() {
+            saveNote(new Callable() {
+                call() {
+                    cancelTabGroup("Notes", false);
+                    showTab("Trench/Notes");
+                }
+            });
         }
     }, "success");
 
@@ -1274,6 +1531,7 @@ checkProjection(){
 checkProjection();
 
 /*** USER ***/
+onEvent("user/usertab/users", "click", "login()");
 
 loadUsers() {
     fetchAll("select userid, fname || ' ' || lname from user", new FetchCallback() {
@@ -1297,51 +1555,6 @@ login() {
             showTabGroup("control");
         }
     });
-}
-
-onEvent("user/usertab/users", "click", "login()");
-
-/*** SYNC ***/
-
-onEvent("control/Control/startsync", "click", "startSync()");
-onEvent("control/Control/stopsync", "click", "stopSync()");
-onEvent("control/Control/connectExternalGPS", "click", "stopGPSLogic();startExternalGPS();updateTrackStatus();");
-onEvent("control/Control/connectInternalGPS", "click", "stopGPSLogic();startInternalGPS();updateTrackStatus();");
-onEvent("control/Control/stopGPS", "click", "stopGPSLogic();updateTrackStatus();");
-
-onEvent("control/Control", "show", "updateTrackStatus()");
-
-updateTrackStatus(){
-    String gpsStatus = "";
-    if(isInternalGPSOn() || isInternalGPSOn()) {
-        if(isInternalGPSOn()) gpsStatus += "Currently connected to Internal GPS.";
-        else gpsStatus += "Currently connected to External GPS.";
-        gpsStatus += "\nCurrent GPS Estimated Accuracy: "+ getGPSEstimatedAccuracy();
-    } else {
-        gpsStatus += "GPS not initialized.";
-    }
-    setFieldValue("control/Control/GPSStatus", gpsStatus);
-}
-
-stopGPSLogic() {
-    if(!isInternalGPSOn() && !isExternalGPSOn()) {
-        stopGPS();
-    }
-}
-
-
-setSyncMinInterval(10.0f);
-setSyncMaxInterval(20.0f);
-setSyncDelay(5.0f);
-
-startSync() {
-    setSyncEnabled(true);
-    setFileSyncEnabled(true);
-}
-
-stopSync() {
-    setSyncEnabled(false);
-    setFileSyncEnabled(false);
 }
 
 loadTrenchAttributes();
