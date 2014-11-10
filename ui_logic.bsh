@@ -739,7 +739,7 @@ addUnitNavigation() {
 
     addNavigationButton("duplicate", new ActionButtonCallback() {
         actionOnLabel() {
-            "Save {Unit}";
+            "Duplicate {Unit}";
         }
         actionOn() {
             saveUnit(new Callable() {
@@ -765,7 +765,7 @@ addUnitNavigation() {
 
     addNavigationButton("save_and_close", new ActionButtonCallback() {
         actionOnLabel() {
-            "Save {Unit}";
+            "Save and Close {Unit}";
         }
         actionOn() {
             saveUnit(new Callable() {
@@ -1369,7 +1369,7 @@ addNoteNavigation() {
 
     addNavigationButton("duplicate", new ActionButtonCallback() {
         actionOnLabel() {
-            "Save {Note}";
+            "Duplicate {Note}";
         }
         actionOn() {
             saveNote(new Callable() {
@@ -1382,7 +1382,7 @@ addNoteNavigation() {
 
     addNavigationButton("save_and_new", new ActionButtonCallback() {
         actionOnLabel() {
-            "Save {Note}";
+            "Save and New {Note}";
         }
         actionOn() {
             saveNote(new Callable() {
@@ -1395,7 +1395,7 @@ addNoteNavigation() {
 
     addNavigationButton("save_and_close", new ActionButtonCallback() {
         actionOnLabel() {
-            "Save {Note}";
+            "Save and Close {Note}";
         }
         actionOn() {
             saveNote(new Callable() {
