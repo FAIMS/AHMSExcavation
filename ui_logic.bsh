@@ -264,6 +264,7 @@ isTrenchSaved() {
             showWarning("Validation Error", "Please enter a Trench ID");
         } else {
             showToast("Please wait for this {Trench} to save");
+
         }
         return false;
     }
@@ -823,6 +824,14 @@ updateUnitCounter(Callable callback) {
         onError(message) {
             showToast(message);
         }
+
+        onError(message) {
+            showToast(message);
+        }
+
+        onError(message) {
+            showToast(message);
+        }
     });
 }
 
@@ -1238,6 +1247,7 @@ addPhotologNavigation() {
             } else {
                 cancelTabGroup("Photograph_log", true);
             }
+
         }
     }, "success");
 
@@ -1315,6 +1325,7 @@ activateAutoSaveNote() {
                     showToast(message);
                 }
             }, true);
+
         }
 
         onError(message) {
