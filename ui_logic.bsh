@@ -1456,17 +1456,6 @@ saveEntitiesToRel(String type, String entity1, String entity2) {
     });
 }
 
-saveEntitiesToRel(String type, String entity1, String entity2, Callable callback) {
-    if (isNull(entity1) || isNull(entity2)) return;
-    saveRel(null, type, null, null, new SaveCallback() {
-        onSave(rel_id, newRecord) {
-            addReln(entity1, rel_id, null);
-            addReln(entity2, rel_id, null);
-            callback.call();
-        }
-    });
-}
-
 makeVocab(String type, String path, String attrib) {
     fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' order by vocabcountorder",
         new FetchCallback() {
@@ -1480,50 +1469,6 @@ makeVocab(String type, String path, String attrib) {
                 } else if(type.equals("List")) {
                     populateList(path, result);
                 }
-            }
-        });
-}
-
-matchVocab(String path, String vocabName, Callable callbackIfTrue, Callable callbackIfFalse) {
-    fetchOne("select vocabname from vocabulary where vocabname = '" + vocabName + "' and vocabid = '" + getFieldValue(path) + "';",
-        new FetchCallback() {
-            onFetch(result) {
-                if (!isNull(result)) {
-                    if(callbackIfTrue != null) callbackIfTrue.call();
-                } else {
-                    if(callbackIfFalse != null) callbackIfFalse.call();
-                }
-            }
-        });
-}
-
-matchVocabID(String vocabid, String vocabName, Callable callbackIfTrue, Callable callbackIfFalse) {
-    fetchOne("select vocabname from vocabulary where vocabname = '" + vocabName + "' and vocabid = '" + vocabid + "';",
-        new FetchCallback() {
-            onFetch(result) {
-                if (!isNull(result)) {
-                    if(callbackIfTrue != null) callbackIfTrue.call();
-                } else {
-                    if(callbackIfFalse != null) callbackIfFalse.call();
-                }
-            }
-        });
-}
-
-setVocab(String path, String attribName, String vocabName) {
-    fetchOne("select vocabid from vocabulary join attributekey using (attributeid) where attributeName = '" + attribName + "' and vocabname = '" + vocabName + "';",
-        new FetchCallback() {
-            onFetch(result) {
-                setFieldValue(path, result.get(0));
-            }
-        });
-}
-
-makePictureGallery(String path, String attrib) {
-    fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabcountorder;",
-        new FetchCallback() {
-            onFetch(result) {
-                populatePictureGallery(path, result);
             }
         });
 }
