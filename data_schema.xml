@@ -247,6 +247,9 @@
     <property name="Sketches" type="file" file="true" thumbnail="true">
       <description>Description TBD</description>
     </property>
+    <property name="Timestamp" type="freetext">
+      <description/>
+    </property>
   </ArchaeologicalElement>
   <ArchaeologicalElement name="Unit">
     <property name="Unit ID" type="freetext" isIdentifier="true">
@@ -509,6 +512,9 @@
     <property name="Sketches" type="file" file="true" thumbnail="true">
       <description>Description TBD</description>
     </property>
+    <property name="Timestamp" type="freetext">
+      <description/>
+    </property>
   </ArchaeologicalElement>
   <ArchaeologicalElement name="Spit">
     <description></description>
@@ -535,6 +541,9 @@
     </property>
     <property name="Spit Author" type="freetext">
       <description>Description TBD</description>
+    </property>
+    <property name="Timestamp" type="freetext">
+      <description/>
     </property>
   </ArchaeologicalElement>
 
@@ -563,6 +572,12 @@
       <description>Description TBD</description>
     </property>
     <property name="PL Job Name" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="PL Author" type="freetext">
+      <description>Description TBD</description>
+    </property>
+    <property name="PL Timestamp" type="freetext">
       <description>Description TBD</description>
     </property>
   </ArchaeologicalElement>
