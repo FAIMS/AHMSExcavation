@@ -1510,7 +1510,7 @@ checkProjection();
 onEvent("user/usertab/users", "click", "login()");
 
 loadUsers() {
-    fetchAll("select userid, fname || ' ' || lname from user", new FetchCallback() {
+    fetchAll("select userid, fname || ' ' || lname from user where userdeleted is null", new FetchCallback() {
         onFetch(result) {
             populateList("user/usertab/users", result);
         }
